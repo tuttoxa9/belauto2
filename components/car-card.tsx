@@ -96,7 +96,7 @@ export default function CarCard({ car }: CarCardProps) {
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-600">Двигатель</span>
-              <span className="font-medium text-slate-900">{formatEngineVolume(car.engineVolume)}л {car.fuelType}</span>
+              <span className="font-medium text-slate-900">{formatEngineVolume(car.engineVolume)} {car.fuelType}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-600">КПП</span>
