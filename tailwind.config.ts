@@ -20,8 +20,9 @@ const config: Config = {
     },
   	extend: {
   		fontFamily: {
-  			sans: ['Roboto Custom', 'Etude Noire', 'Aviano', 'Squad', 'system-ui', 'sans-serif'],
-  			display: ['Roboto Custom', 'Etude Noire', 'Aviano', 'Squad', 'system-ui', 'sans-serif'],
+  			sans: ['Geoform', 'Roboto Custom', 'Etude Noire', 'Aviano', 'Squad', 'system-ui', 'sans-serif'],
+  			display: ['Geoform', 'Roboto Custom', 'Etude Noire', 'Aviano', 'Squad', 'system-ui', 'sans-serif'],
+  			geoform: ['Geoform', 'system-ui', 'sans-serif'],
   			aviano: ['Aviano', 'system-ui', 'sans-serif'],
   			etude: ['Etude Noire', 'system-ui', 'sans-serif'],
   			roboto: ['Roboto Custom', 'system-ui', 'sans-serif'],
