@@ -163,7 +163,7 @@ export default function HomePage() {
 
           <Button
             size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-base sm:text-lg px-6 sm:px-10 py-4 sm:py-6 rounded-2xl font-semibold shadow-2xl transform hover:scale-105 transition-all duration-300"
+            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-base sm:text-lg px-6 sm:px-10 py-4 sm:py-6 rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
             asChild
           >
             <a href="/catalog">{settings.heroButtonText}</a>
