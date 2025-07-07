@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Eye } from "lucide-react"
+
 import FadeInImage from "@/components/fade-in-image"
 import { useUsdBynRate } from "@/components/providers/usd-byn-rate-provider"
 import { convertUsdToByn } from "@/lib/utils"
@@ -54,7 +54,7 @@ export default function CarCard({ car }: CarCardProps) {
             <FadeInImage
               src={car.imageUrls[0] || "/placeholder.svg?height=160&width=280"}
               alt={`${car.make} ${car.model}`}
-              className="w-full h-36 object-cover group-hover:scale-102 transition-transform duration-300"
+              className="w-full h-48 object-cover group-hover:scale-102 transition-transform duration-300"
             />
 
             {/* Status indicator */}
@@ -104,18 +104,7 @@ export default function CarCard({ car }: CarCardProps) {
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="border-t border-slate-100 my-3"></div>
 
-          {/* Status */}
-          <div className="flex items-center justify-between">
-            <span className={`text-sm font-medium ${car.isAvailable ? 'text-emerald-600' : 'text-red-600'}`}>
-              {car.isAvailable ? 'В наличии' : 'Продан'}
-            </span>
-            <div className="text-slate-400 group-hover:text-slate-600 transition-colors">
-              <Eye className="h-4 w-4" />
-            </div>
-          </div>
         </CardContent>
       </Link>
     </Card>
