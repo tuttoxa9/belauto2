@@ -33,7 +33,14 @@ export default function AdminCars() {
     description: "",
     imageUrls: [""],
     isAvailable: true,
-    specifications: {},
+    specifications: {
+      "Двигатель": "",
+      "Разгон 0-100": "",
+      "Расход топлива": "",
+      "Привод": "",
+      "Коробка передач": "",
+      "Мощность": ""
+    },
     features: [],
   })
 
@@ -129,7 +136,14 @@ export default function AdminCars() {
       description: "",
       imageUrls: [""],
       isAvailable: true,
-      specifications: {},
+      specifications: {
+        "Двигатель": "",
+        "Разгон 0-100": "",
+        "Расход топлива": "",
+        "Привод": "",
+        "Коробка передач": "",
+        "Мощность": ""
+      },
       features: [],
     })
   }
