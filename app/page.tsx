@@ -186,13 +186,13 @@ export default function HomePage() {
         <div className="container px-4">
 
           {loadingCars ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {Array.from({ length: 4 }).map((_, index) => (
                 <CarCardSkeleton key={index} />
               ))}
             </div>
           ) : cars && cars.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {cars.map((car) => (
                 <CarCard key={car.id} car={car} />
               ))}
