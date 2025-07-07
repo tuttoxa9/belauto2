@@ -1,0 +1,22 @@
+name = "autobel1"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+name = "autobel1-production"
+
+[env.development]
+name = "autobel1-dev"
+
+# Environment variables
+[vars]
+NODE_ENV = "production"
+
+# Secrets (will be added via CLI)
+# TELEGRAM_BOT_TOKEN
+# TELEGRAM_CHAT_ID
+# NEXT_PUBLIC_FIREBASE_API_KEY
+# etc.
+
+# Build configuration
+build.command = "bun run pages:build"
