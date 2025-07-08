@@ -361,9 +361,7 @@ export default function CarDetailsPage() {
     }
   }
 
-  if (loading) {
-    return <CarDetailsSkeleton />
-  }
+
 
   if (carNotFound) {
     return <CarNotFoundComponent contactPhone={contactPhone} />
