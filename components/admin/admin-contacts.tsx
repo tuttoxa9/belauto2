@@ -34,9 +34,9 @@ export default function AdminContacts() {
         name: "@avtobusiness",
         url: "https://t.me/avtobusiness"
       },
-      vk: {
-        name: "vk.com/avtobusiness",
-        url: "https://vk.com/avtobusiness"
+      avby: {
+        name: "av.by/company/avtobusiness",
+        url: "https://av.by/company/avtobusiness"
       },
       tiktok: {
         name: "@avtobusiness_by",
@@ -308,46 +308,46 @@ export default function AdminContacts() {
               </div>
             </div>
             <div>
-              <Label className="text-white mb-2 block">VKontakte</Label>
+              <Label className="text-white mb-2 block">av.by</Label>
               <div className="space-y-2">
                 <div>
                   <Label className="text-gray-300 text-sm">Имя аккаунта</Label>
                   <Input
-                    value={contactsData.socialMedia.vk?.name || ''}
+                    value={contactsData.socialMedia.avby?.name || ''}
                     onChange={(e) =>
                       setContactsData({
                         ...contactsData,
                         socialMedia: {
                           ...contactsData.socialMedia,
-                          vk: {
+                          avby: {
                             name: e.target.value,
-                            url: contactsData.socialMedia.vk?.url || ''
+                            url: contactsData.socialMedia.avby?.url || ''
                           }
                         },
                       })
                     }
                     className="bg-slate-700 border-slate-600 text-white"
-                    placeholder="vk.com/avtobusiness"
+                    placeholder="av.by/company/avtobusiness"
                   />
                 </div>
                 <div>
                   <Label className="text-gray-300 text-sm">Ссылка</Label>
                   <Input
-                    value={contactsData.socialMedia.vk?.url || ''}
+                    value={contactsData.socialMedia.avby?.url || ''}
                     onChange={(e) =>
                       setContactsData({
                         ...contactsData,
                         socialMedia: {
                           ...contactsData.socialMedia,
-                          vk: {
-                            name: contactsData.socialMedia.vk?.name || '',
+                          avby: {
+                            name: contactsData.socialMedia.avby?.name || '',
                             url: e.target.value
                           }
                         },
                       })
                     }
                     className="bg-slate-700 border-slate-600 text-white"
-                    placeholder="https://vk.com/avtobusiness"
+                    placeholder="https://av.by/company/avtobusiness"
                   />
                 </div>
               </div>

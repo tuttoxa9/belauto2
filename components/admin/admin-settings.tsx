@@ -24,7 +24,7 @@ export default function AdminSettings() {
       socialMedia: {
         instagram: "#",
         telegram: "#",
-        vk: "#",
+        avby: "#",
         tiktok: "#",
       },
       yandexMapsApiKey: "",
@@ -231,15 +231,15 @@ export default function AdminSettings() {
                   />
                 </div>
                 <div>
-                  <Label>VKontakte</Label>
+                  <Label>av.by</Label>
                   <Input
-                    value={settings.main.socialMedia.vk}
+                    value={settings.main.socialMedia.avby}
                     onChange={(e) =>
                       setSettings({
                         ...settings,
                         main: {
                           ...settings.main,
-                          socialMedia: { ...settings.main.socialMedia, vk: e.target.value },
+                          socialMedia: { ...settings.main.socialMedia, avby: e.target.value },
                         },
                       })
                     }
