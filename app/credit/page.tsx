@@ -523,21 +523,22 @@ export default function CreditPage() {
                           <SelectItem
                             key={partner.name}
                             value={partner.name.toLowerCase().replace(/[\s-]/g, '')}
-                            className="relative pr-16"
                           >
-                            <div className="flex items-center gap-2 w-full">
-                              {partner.logoUrl && (
-                                <Image
-                                  src={getCachedImageUrl(partner.logoUrl)}
-                                  alt={`${partner.name} логотип`}
-                                  width={20}
-                                  height={20}
-                                  className="object-contain rounded flex-shrink-0"
-                                />
-                              )}
-                              <span className="truncate pr-8">{partner.name}</span>
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center gap-2">
+                                {partner.logoUrl && (
+                                  <Image
+                                    src={getCachedImageUrl(partner.logoUrl)}
+                                    alt={`${partner.name} логотип`}
+                                    width={20}
+                                    height={20}
+                                    className="object-contain rounded flex-shrink-0"
+                                  />
+                                )}
+                                <span className="truncate">{partner.name}</span>
+                              </div>
+                              <span className="text-sm font-semibold text-slate-600 ml-2">{partner.minRate}%</span>
                             </div>
-                            <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sm font-semibold text-slate-600">{partner.minRate}%</span>
                           </SelectItem>
                         ))}
                         <SelectItem value="custom">Ввести ставку вручную</SelectItem>
@@ -682,21 +683,22 @@ export default function CreditPage() {
                             <SelectItem
                               key={partner.name}
                               value={partner.name.toLowerCase().replace(/[\s-]/g, '')}
-                              className="relative pr-16"
                             >
-                              <div className="flex items-center gap-2 w-full">
-                                {partner.logoUrl && (
-                                  <Image
-                                    src={getCachedImageUrl(partner.logoUrl)}
-                                    alt={`${partner.name} логотип`}
-                                    width={20}
-                                    height={20}
-                                    className="object-contain rounded flex-shrink-0"
-                                  />
-                                )}
-                                <span className="truncate pr-8">{partner.name}</span>
+                              <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-2">
+                                  {partner.logoUrl && (
+                                    <Image
+                                      src={getCachedImageUrl(partner.logoUrl)}
+                                      alt={`${partner.name} логотип`}
+                                      width={20}
+                                      height={20}
+                                      className="object-contain rounded flex-shrink-0"
+                                    />
+                                  )}
+                                  <span className="truncate">{partner.name}</span>
+                                </div>
+                                <span className="text-sm font-semibold text-slate-600 ml-2">{partner.minRate}%</span>
                               </div>
-                              <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sm font-semibold text-slate-600">{partner.minRate}%</span>
                             </SelectItem>
                           ))}
                           <SelectItem value="any">Любой банк</SelectItem>
