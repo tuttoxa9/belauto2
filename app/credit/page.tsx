@@ -518,24 +518,34 @@ export default function CreditPage() {
                     <SelectTrigger className="mt-1 h-9">
                       <SelectValue placeholder="Выберите банк">
                         {manualInputs.selectedBank && manualInputs.selectedBank !== 'custom' && settings?.partners ? (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center gap-2">
+                              {(() => {
+                                const selectedPartner = settings.partners.find(partner =>
+                                  partner.name.toLowerCase().replace(/[\s-]/g, '') === manualInputs.selectedBank
+                                )
+                                return selectedPartner ? (
+                                  <>
+                                    {selectedPartner.logoUrl && (
+                                      <Image
+                                        src={getCachedImageUrl(selectedPartner.logoUrl)}
+                                        alt={`${selectedPartner.name} логотип`}
+                                        width={20}
+                                        height={20}
+                                        className="object-contain rounded flex-shrink-0"
+                                      />
+                                    )}
+                                    <span>{selectedPartner.name}</span>
+                                  </>
+                                ) : null
+                              })()}
+                            </div>
                             {(() => {
                               const selectedPartner = settings.partners.find(partner =>
                                 partner.name.toLowerCase().replace(/[\s-]/g, '') === manualInputs.selectedBank
                               )
                               return selectedPartner ? (
-                                <>
-                                  {selectedPartner.logoUrl && (
-                                    <Image
-                                      src={getCachedImageUrl(selectedPartner.logoUrl)}
-                                      alt={`${selectedPartner.name} логотип`}
-                                      width={20}
-                                      height={20}
-                                      className="object-contain rounded flex-shrink-0"
-                                    />
-                                  )}
-                                  <span>{selectedPartner.name}</span>
-                                </>
+                                <span className="text-sm font-semibold text-slate-600">{selectedPartner.minRate}%</span>
                               ) : null
                             })()}
                           </div>
@@ -703,24 +713,34 @@ export default function CreditPage() {
                         <SelectTrigger>
                           <SelectValue placeholder="Выберите банк">
                             {creditForm.bank && creditForm.bank !== 'any' && settings?.partners ? (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-2">
+                                  {(() => {
+                                    const selectedPartner = settings.partners.find(partner =>
+                                      partner.name.toLowerCase().replace(/[\s-]/g, '') === creditForm.bank
+                                    )
+                                    return selectedPartner ? (
+                                      <>
+                                        {selectedPartner.logoUrl && (
+                                          <Image
+                                            src={getCachedImageUrl(selectedPartner.logoUrl)}
+                                            alt={`${selectedPartner.name} логотип`}
+                                            width={20}
+                                            height={20}
+                                            className="object-contain rounded flex-shrink-0"
+                                          />
+                                        )}
+                                        <span>{selectedPartner.name}</span>
+                                      </>
+                                    ) : null
+                                  })()}
+                                </div>
                                 {(() => {
                                   const selectedPartner = settings.partners.find(partner =>
                                     partner.name.toLowerCase().replace(/[\s-]/g, '') === creditForm.bank
                                   )
                                   return selectedPartner ? (
-                                    <>
-                                      {selectedPartner.logoUrl && (
-                                        <Image
-                                          src={getCachedImageUrl(selectedPartner.logoUrl)}
-                                          alt={`${selectedPartner.name} логотип`}
-                                          width={20}
-                                          height={20}
-                                          className="object-contain rounded flex-shrink-0"
-                                        />
-                                      )}
-                                      <span>{selectedPartner.name}</span>
-                                    </>
+                                    <span className="text-sm font-semibold text-slate-600">{selectedPartner.minRate}%</span>
                                   ) : null
                                 })()}
                               </div>
