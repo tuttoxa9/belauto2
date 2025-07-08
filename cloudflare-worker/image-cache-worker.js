@@ -8,6 +8,9 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    // Добавляем заголовок для отладки
+    console.log('Worker processing:', url.pathname);
+
     // Получаем путь к файлу из URL (например, /cars/image1.jpg)
     // url.pathname.substring(1) убирает первый слэш
     let imagePath = url.pathname.substring(1);
@@ -36,6 +39,11 @@ export default {
       response = await fetch(firebaseStorageUrl, {
         headers: {
           'User-Agent': 'Cloudflare-Worker-Image-Cache/1.0'
+        },
+        // Принудительно включаем кэширование для этого запроса
+        cf: {
+          cacheTtl: 2592000, // 30 дней
+          cacheEverything: true
         }
       });
 
@@ -52,7 +60,7 @@ export default {
 
       // === САМАЯ ВАЖНАЯ ЧАСТЬ: УПРАВЛЕНИЕ КЭШИРОВАНИЕМ ===
       // Говорим Cloudflare кэшировать на 30 дней
-      headers.set('Cache-Control', 'public, max-age=2592000');
+      headers.set('Cache-Control', 'public, max-age=2592000, immutable');
       // Говорим браузеру кэшировать на 1 день
       headers.set('CDN-Cache-Control', 'public, max-age=86400');
       // Дополнительно для Cloudflare
@@ -60,6 +68,7 @@ export default {
       // Помечаем, что кэшировано нашим worker
       headers.set('X-Cached-By', 'Cloudflare-Worker');
       headers.set('X-Cache-Status', 'MISS');
+      headers.set('CF-Cache-Status', 'MISS');
 
       // Создаем финальный ответ
       response = new Response(responseClone.body, {
@@ -74,6 +83,8 @@ export default {
       // Если нашли в кэше, добавляем соответствующий заголовок
       const headers = new Headers(response.headers);
       headers.set('X-Cache-Status', 'HIT');
+      headers.set('CF-Cache-Status', 'HIT');
+      headers.set('X-Cached-By', 'Cloudflare-Worker');
 
       response = new Response(response.body, {
         status: response.status,

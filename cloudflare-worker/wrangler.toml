@@ -5,7 +5,7 @@ compatibility_date = "2024-01-01"
 [env.production]
 name = "autobel-image-cache"
 routes = [
-  { pattern = "images.autobel.by/*", zone_name = "autobel.by" }
+  { pattern = "images.belautocenter.by/*", zone_name = "belautocenter.by" }
 ]
 
 [env.development]
