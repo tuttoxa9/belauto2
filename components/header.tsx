@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Menu, Phone, Loader2 } from "lucide-react"
+import { Menu, Phone, Loader2, Check } from "lucide-react"
 import { doc, getDoc, collection, addDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 
@@ -35,7 +35,7 @@ export default function Header() {
   const pathname = usePathname()
   const [isCallbackOpen, setIsCallbackOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [formData, setFormData] = useState({ name: "", phone: "" })
+  const [formData, setFormData] = useState({ name: "", phone: "+375" })
   const [settings, setSettings] = useState<Settings | null>(null)
   const [phoneLoading, setPhoneLoading] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -82,7 +82,7 @@ export default function Header() {
       })
 
       setIsCallbackOpen(false)
-      setFormData({ name: "", phone: "" })
+      setFormData({ name: "", phone: "+375" })
       alert("Заявка отправлена! Мы свяжемся с вами в ближайшее время.")
     } catch (error) {
       console.error("Ошибка отправки заявки:", error)
@@ -91,12 +91,23 @@ export default function Header() {
   }
 
   const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, "")
-    if (numbers.startsWith("375")) {
-      const formatted = numbers.replace(/(\d{3})(\d{2})(\d{3})(\d{2})(\d{2})/, "+$1 $2 $3-$4-$5")
-      return formatted
+    // Удаляем все нецифровые символы кроме +
+    let numbers = value.replace(/[^\d+]/g, "")
+
+    // Если нет + в начале, добавляем +375
+    if (!numbers.startsWith("+375")) {
+      numbers = "+375"
     }
-    return value
+
+    // Берем только +375 и следующие 9 цифр максимум
+    const prefix = "+375"
+    const afterPrefix = numbers.slice(4).replace(/\D/g, "").slice(0, 9)
+
+    return prefix + afterPrefix
+  }
+
+  const isPhoneValid = (phone: string) => {
+    return phone.length === 13 && phone.startsWith("+375")
   }
 
   return (
@@ -135,13 +146,19 @@ export default function Header() {
                 </div>
                 <div>
                   <Label htmlFor="phone">Номер телефона</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) })}
-                    placeholder="+375 XX XXX-XX-XX"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="phone"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) })}
+                      placeholder="+375XXXXXXXXX"
+                      required
+                      className="pr-10"
+                    />
+                    {isPhoneValid(formData.phone) && (
+                      <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-500" />
+                    )}
+                  </div>
                 </div>
                 <Button type="submit" className="w-full">
                   Заказать звонок
@@ -324,13 +341,19 @@ export default function Header() {
                 </div>
                 <div>
                   <Label htmlFor="phone">Номер телефона</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) })}
-                    placeholder="+375 XX XXX-XX-XX"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="phone"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) })}
+                      placeholder="+375XXXXXXXXX"
+                      required
+                      className="pr-10"
+                    />
+                    {isPhoneValid(formData.phone) && (
+                      <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-500" />
+                    )}
+                  </div>
                 </div>
                 <Button type="submit" className="w-full">
                   Заказать звонок
