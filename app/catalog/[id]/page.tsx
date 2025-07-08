@@ -304,11 +304,7 @@ export default function CarDetailsPage() {
   }
 
   const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, "")
-    if (numbers.startsWith("375")) {
-      const formatted = numbers.replace(/(\d{3})(\d{2})(\d{3})(\d{2})(\d{2})/, "+$1 $2 $3-$4-$5")
-      return formatted
-    }
+    // Просто возвращаем значение как есть, без форматирования
     return value
   }
 
