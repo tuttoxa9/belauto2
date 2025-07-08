@@ -174,12 +174,12 @@ export default function Footer() {
                     <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 8.16l-1.584 7.44c-.12.528-.432.66-.876.412l-2.424-1.788-1.164 1.12c-.132.132-.24.24-.492.24l.168-2.388 4.416-3.984c.192-.168-.036-.264-.3-.096l-5.46 3.432-2.352-.744c-.516-.156-.528-.516.108-.768l9.192-3.54c.432-.156.804.108.672.672z"/>
                   </svg>
                 </a>
-                <a href={settings?.socialMedia?.avby || "#"} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2 bg-white rounded-lg">
+                <a href={settings?.socialMedia?.avby || "#"} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-3 bg-white rounded-lg">
                   <Image
                     src="/av.png"
                     alt="av.by"
-                    width={24}
-                    height={18}
+                    width={28}
+                    height={22}
                     className="object-contain"
                   />
                 </a>
