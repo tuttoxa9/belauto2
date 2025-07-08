@@ -143,7 +143,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-100 homepage -mt-14">
       {/* Главный баннер */}
-      <section className="relative min-h-[80vh] sm:h-[75vh] flex items-center justify-center pt-14">
+      <section className="relative min-h-[85vh] sm:min-h-[80vh] md:h-[75vh] flex items-center justify-center pt-14">
 
         {/* Фоновое изображение для ПК */}
         <div
@@ -163,19 +163,19 @@ export default function HomePage() {
             top: 0,
             left: 0,
             right: 0,
-            bottom: '140px', // Заканчиваем фон на уровне начала Stories блока
+            bottom: '120px', // Увеличиваем отступ снизу для лучшего перехода
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('${getCachedImageUrl('/mainTouran-mobile.jpg')}')`,
             backgroundSize: 'cover',
-            backgroundPosition: 'center center',
+            backgroundPosition: 'center top', // Изменяем позицию на center top
             backgroundRepeat: 'no-repeat'
           }}
         />
 
-        <div className="relative z-30 text-center text-white max-w-4xl mx-auto px-4 pb-24 sm:pb-20 md:pb-16 hero-content">
+        <div className="relative z-30 text-center text-white max-w-4xl mx-auto px-4 pb-32 sm:pb-24 md:pb-16 hero-content">
           <h1 className="text-hero text-2xl sm:text-3xl md:text-6xl mb-4 sm:mb-6 leading-tight">
             Найди свой <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">идеальный автомобиль</span> надежным способом
           </h1>
-          <p className="text-base sm:text-lg md:text-2xl mb-6 sm:mb-8 text-gray-100 font-medium leading-relaxed">
+          <p className="text-base sm:text-lg md:text-2xl mb-8 sm:mb-8 text-gray-100 font-medium leading-relaxed">
             {settings.heroSubtitle}
           </p>
 
