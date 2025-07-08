@@ -42,9 +42,9 @@ export default function ContactsPage() {
         name: "@avtobusiness",
         url: "https://t.me/avtobusiness"
       },
-      vk: {
-        name: "vk.com/avtobusiness",
-        url: "https://vk.com/avtobusiness"
+      avby: {
+        name: "av.by/company/avtobusiness",
+        url: "https://av.by/company/avtobusiness"
       },
       tiktok: {
         name: "@avtobusiness_by",
@@ -303,21 +303,21 @@ export default function ContactsPage() {
                     </a>
                   )}
 
-                  {contactsData.socialMedia.vk && (
+                  {contactsData.socialMedia.avby && (
                     <a
-                      href={contactsData.socialMedia.vk.url || "#"}
+                      href={contactsData.socialMedia.avby.url || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center space-x-3 p-4 bg-gradient-to-br from-blue-50 to-white rounded-2xl hover:shadow-md hover:scale-105 transition-all duration-300 group border-0"
+                      className="flex items-center space-x-3 p-4 bg-gradient-to-br from-red-50 to-white rounded-2xl hover:shadow-md hover:scale-105 transition-all duration-300 group border-0"
                     >
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                         <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M15.684 0H8.316C1.592 0 0 1.592 0 8.316v7.368C0 22.408 1.592 24 8.316 24h7.368C22.408 24 24 22.408 24 15.684V8.316C24 1.592 22.408 0 15.684 0zM18.947 17.684c-.474 0-.947-.947-2.526-2.526-1.263-1.263-1.263-1.263-2.526 0v2.526c0 .947-.474.947-.947.947s-.947 0-.947-.947V6.316c0-.947.474-.947.947-.947s.947 0 .947.947v7.368c1.263-1.263 1.263-1.263 2.526 0 1.579 1.579 2.052 2.526 2.526 2.526.474 0 .947 0 .947-.947v-.947c0-.474-.474-.474-.947-.474z"/>
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 text-sm">VKontakte</p>
-                        <p className="text-xs text-gray-500 truncate">{contactsData.socialMedia.vk.name}</p>
+                        <p className="font-semibold text-gray-900 text-sm">av.by</p>
+                        <p className="text-xs text-gray-500 truncate">{contactsData.socialMedia.avby.name}</p>
                       </div>
                     </a>
                   )}
