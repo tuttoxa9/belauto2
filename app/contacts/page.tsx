@@ -13,8 +13,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MapPin, Phone, Mail, Clock, Instagram, ExternalLink } from "lucide-react"
 import YandexMap from "@/components/yandex-map"
+import ContactsPageSkeleton from "@/components/contacts-page-skeleton"
 
 export default function ContactsPage() {
+  const [loading, setLoading] = useState(true)
   const [contactForm, setContactForm] = useState({
     name: "",
     phone: "",
@@ -60,12 +62,17 @@ export default function ContactsPage() {
 
   const loadContactsData = async () => {
     try {
+      // Симулируем минимальное время загрузки для лучшего UX
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
       const contactsDoc = await getDoc(doc(db, "pages", "contacts"))
       if (contactsDoc.exists()) {
         setContactsData(contactsDoc.data() as typeof contactsData)
       }
     } catch (error) {
       console.error("Ошибка загрузки данных:", error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -110,6 +117,10 @@ export default function ContactsPage() {
       console.error("Ошибка отправки сообщения:", error)
       alert("Произошла ошибка. Попробуйте еще раз.")
     }
+  }
+
+  if (loading) {
+    return <ContactsPageSkeleton />
   }
 
   return (
