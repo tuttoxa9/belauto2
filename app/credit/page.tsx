@@ -124,7 +124,7 @@ export default function CreditPage() {
   }
 
   const getCreditMaxValue = () => {
-    return isBelarusianRubles ? 600000 : 200000
+    return isBelarusianRubles ? 300000 : 100000
   }
 
   const handleCurrencyChange = (checked: boolean) => {
@@ -324,7 +324,7 @@ export default function CreditPage() {
                     onValueChange={(value) => setCalculator({ ...calculator, carPrice: value })}
                     max={getCreditMaxValue()}
                     min={getCreditMinValue()}
-                    step={isBelarusianRubles ? 1000 : 5000}
+                    step={isBelarusianRubles ? 500 : 1000}
                     className="mt-2"
                   />
                 </div>
@@ -336,7 +336,7 @@ export default function CreditPage() {
                     onValueChange={(value) => setCalculator({ ...calculator, downPayment: value })}
                     max={calculator.carPrice[0] * 0.8}
                     min={calculator.carPrice[0] * 0.1}
-                    step={isBelarusianRubles ? 500 : 1000}
+                    step={isBelarusianRubles ? 200 : 500}
                     className="mt-2"
                   />
                 </div>
@@ -348,7 +348,7 @@ export default function CreditPage() {
                     onValueChange={(value) => setCalculator({ ...calculator, loanTerm: value })}
                     max={84}
                     min={12}
-                    step={6}
+                    step={3}
                     className="mt-2"
                   />
                 </div>
@@ -360,7 +360,7 @@ export default function CreditPage() {
                     onValueChange={(value) => setCalculator({ ...calculator, interestRate: value })}
                     max={25}
                     min={10}
-                    step={0.5}
+                    step={0.25}
                     className="mt-2"
                   />
                 </div>
@@ -502,8 +502,9 @@ export default function CreditPage() {
                             <SelectItem
                               key={partner.name}
                               value={partner.name.toLowerCase().replace(/[\s-]/g, '')}
+                              className="pr-16"
                             >
-                              <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center justify-between w-full relative">
                                 <div className="flex items-center gap-2">
                                   {partner.logoUrl && (
                                     <Image
@@ -516,7 +517,7 @@ export default function CreditPage() {
                                   )}
                                   <span>{partner.name}</span>
                                 </div>
-                                <span className="text-sm font-semibold text-slate-600">{partner.minRate}%</span>
+                                <span className="absolute right-2 text-sm font-semibold text-slate-600">{partner.minRate}%</span>
                               </div>
                             </SelectItem>
                           ))}
