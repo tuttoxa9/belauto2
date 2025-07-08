@@ -243,31 +243,34 @@
   /* Адаптивные настройки для мобильных */
   @media (max-width: 768px) {
     .hero-bg-mobile {
-      background-position: center 50% !important;
+      background-position: center 65% !important;
+      bottom: 120px !important; /* Заканчиваем фон перед Stories блоком */
     }
 
     .hero-content {
-      padding-bottom: 2rem !important;
+      padding-bottom: 8rem !important;
     }
   }
 
   @media (max-width: 480px) {
     .hero-bg-mobile {
-      background-position: center 45% !important;
+      background-position: center 70% !important;
+      bottom: 130px !important;
     }
 
     .hero-content {
-      padding-bottom: 1.5rem !important;
+      padding-bottom: 10rem !important;
     }
   }
 
   @media (max-width: 375px) {
     .hero-bg-mobile {
-      background-position: center 40% !important;
+      background-position: center 75% !important;
+      bottom: 140px !important;
     }
 
     .hero-content {
-      padding-bottom: 1rem !important;
+      padding-bottom: 12rem !important;
     }
   }
 }

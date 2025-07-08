@@ -143,7 +143,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-100 homepage -mt-14">
       {/* Главный баннер */}
-      <section className="relative min-h-[50vh] sm:min-h-[60vh] md:h-[75vh] flex items-center justify-center pt-14">
+      <section className="relative min-h-[80vh] sm:h-[75vh] flex items-center justify-center pt-14">
 
         {/* Фоновое изображение для ПК */}
         <div
@@ -158,8 +158,12 @@ export default function HomePage() {
 
         {/* Фоновое изображение для мобильных */}
         <div
-          className="absolute inset-0 bg-cover bg-center hero-bg-mobile block md:hidden"
+          className="absolute hero-bg-mobile block md:hidden"
           style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: '140px', // Заканчиваем фон на уровне начала Stories блока
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('${getCachedImageUrl('/mainTouran-mobile.jpg')}')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center center',
@@ -167,7 +171,7 @@ export default function HomePage() {
           }}
         />
 
-        <div className="relative z-30 text-center text-white max-w-4xl mx-auto px-4 pb-8 sm:pb-12 md:pb-16 hero-content">
+        <div className="relative z-30 text-center text-white max-w-4xl mx-auto px-4 pb-24 sm:pb-20 md:pb-16 hero-content">
           <h1 className="text-hero text-2xl sm:text-3xl md:text-6xl mb-4 sm:mb-6 leading-tight">
             Найди свой <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">идеальный автомобиль</span> надежным способом
           </h1>
@@ -189,7 +193,7 @@ export default function HomePage() {
         {/* Закругленный переход с Stories */}
         <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[30px] z-20">
           {/* Блок "Свежие поступления и новости" интегрированный в закругление */}
-          <div className="pt-4 pb-10 bg-gradient-to-b from-white to-gray-200 relative rounded-t-[30px]">
+          <div className="pt-3 pb-10 bg-gradient-to-b from-white to-gray-200 relative rounded-t-[30px]">
             <Stories />
           </div>
         </div>
