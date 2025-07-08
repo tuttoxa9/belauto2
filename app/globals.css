@@ -214,35 +214,33 @@
     letter-spacing: 0.025em;
   }
 
-  /* Адаптивное фоновое изображение для мобильных устройств */
-  @media (max-width: 768px) {
-    .hero-bg {
-      background-size: 120% auto !important;
-      background-position: center 40% !important;
-      background-repeat: no-repeat !important;
-    }
+  /* Стили для фонового изображения на мобильных устройствах */
+  .hero-bg-mobile {
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+  }
 
+  .hero-bg-desktop {
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+  }
+
+  /* Адаптивные отступы для контента */
+  @media (max-width: 768px) {
     .hero-content {
       padding-bottom: 8rem !important;
     }
   }
 
   @media (max-width: 480px) {
-    .hero-bg {
-      background-size: 140% auto !important;
-      background-position: center 35% !important;
-    }
-
     .hero-content {
       padding-bottom: 10rem !important;
     }
   }
 
   @media (max-width: 375px) {
-    .hero-bg {
-      background-size: 160% auto !important;
-      background-position: center 30% !important;
-    }
 
     .hero-content {
       padding-bottom: 12rem !important;

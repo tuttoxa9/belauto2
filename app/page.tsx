@@ -145,10 +145,22 @@ export default function HomePage() {
       {/* Главный баннер */}
       <section className="relative min-h-[80vh] sm:h-[75vh] flex items-center justify-center pt-14">
 
+        {/* Фоновое изображение для ПК */}
         <div
-          className="absolute inset-0 bg-cover bg-center hero-bg"
+          className="absolute inset-0 bg-cover bg-center hero-bg-desktop hidden md:block"
           style={{
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('${getCachedImageUrl('/mainTouran.PNG')}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+
+        {/* Фоновое изображение для мобильных */}
+        <div
+          className="absolute inset-0 bg-cover bg-center hero-bg-mobile block md:hidden"
+          style={{
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('${getCachedImageUrl('/mainTouran-mobile.jpg')}')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat'
