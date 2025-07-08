@@ -485,22 +485,21 @@ export default function CreditPage() {
                           <SelectItem
                             key={partner.name}
                             value={partner.name.toLowerCase().replace(/[\s-]/g, '')}
-                            className="pr-16"
                           >
-                            <div className="flex items-center justify-between w-full relative">
-                              <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-between w-full gap-2">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
                                 {partner.logoUrl && (
                                   <Image
                                     src={getCachedImageUrl(partner.logoUrl)}
                                     alt={`${partner.name} логотип`}
                                     width={20}
                                     height={20}
-                                    className="object-contain rounded"
+                                    className="object-contain rounded flex-shrink-0"
                                   />
                                 )}
-                                <span>{partner.name}</span>
+                                <span className="truncate">{partner.name}</span>
                               </div>
-                              <span className="absolute right-2 text-sm font-semibold text-slate-600">{partner.minRate}%</span>
+                              <span className="text-sm font-semibold text-slate-600 flex-shrink-0">{partner.minRate}%</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -675,22 +674,21 @@ export default function CreditPage() {
                             <SelectItem
                               key={partner.name}
                               value={partner.name.toLowerCase().replace(/[\s-]/g, '')}
-                              className="pr-16"
                             >
-                              <div className="flex items-center justify-between w-full relative">
-                                <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-between w-full gap-2">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
                                   {partner.logoUrl && (
                                     <Image
                                       src={getCachedImageUrl(partner.logoUrl)}
                                       alt={`${partner.name} логотип`}
                                       width={20}
                                       height={20}
-                                      className="object-contain rounded"
+                                      className="object-contain rounded flex-shrink-0"
                                     />
                                   )}
-                                  <span>{partner.name}</span>
+                                  <span className="truncate">{partner.name}</span>
                                 </div>
-                                <span className="absolute right-2 text-sm font-semibold text-slate-600">{partner.minRate}%</span>
+                                <span className="text-sm font-semibold text-slate-600 flex-shrink-0">{partner.minRate}%</span>
                               </div>
                             </SelectItem>
                           ))}
