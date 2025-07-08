@@ -516,7 +516,33 @@ export default function CreditPage() {
                     onValueChange={handleBankSelection}
                   >
                     <SelectTrigger className="mt-1 h-9">
-                      <SelectValue placeholder="Выберите банк" />
+                      <SelectValue placeholder="Выберите банк">
+                        {manualInputs.selectedBank && manualInputs.selectedBank !== 'custom' && settings?.partners ? (
+                          <div className="flex items-center gap-2">
+                            {(() => {
+                              const selectedPartner = settings.partners.find(partner =>
+                                partner.name.toLowerCase().replace(/[\s-]/g, '') === manualInputs.selectedBank
+                              )
+                              return selectedPartner ? (
+                                <>
+                                  {selectedPartner.logoUrl && (
+                                    <Image
+                                      src={getCachedImageUrl(selectedPartner.logoUrl)}
+                                      alt={`${selectedPartner.name} логотип`}
+                                      width={20}
+                                      height={20}
+                                      className="object-contain rounded flex-shrink-0"
+                                    />
+                                  )}
+                                  <span>{selectedPartner.name}</span>
+                                </>
+                              ) : null
+                            })()}
+                          </div>
+                        ) : manualInputs.selectedBank === 'custom' ? (
+                          'Ввести ставку вручную'
+                        ) : null}
+                      </SelectValue>
                     </SelectTrigger>
                       <SelectContent>
                         {settings?.partners?.map((partner) => (
@@ -675,7 +701,33 @@ export default function CreditPage() {
                         onValueChange={(value) => setCreditForm({ ...creditForm, bank: value })}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Выберите банк" />
+                          <SelectValue placeholder="Выберите банк">
+                            {creditForm.bank && creditForm.bank !== 'any' && settings?.partners ? (
+                              <div className="flex items-center gap-2">
+                                {(() => {
+                                  const selectedPartner = settings.partners.find(partner =>
+                                    partner.name.toLowerCase().replace(/[\s-]/g, '') === creditForm.bank
+                                  )
+                                  return selectedPartner ? (
+                                    <>
+                                      {selectedPartner.logoUrl && (
+                                        <Image
+                                          src={getCachedImageUrl(selectedPartner.logoUrl)}
+                                          alt={`${selectedPartner.name} логотип`}
+                                          width={20}
+                                          height={20}
+                                          className="object-contain rounded flex-shrink-0"
+                                        />
+                                      )}
+                                      <span>{selectedPartner.name}</span>
+                                    </>
+                                  ) : null
+                                })()}
+                              </div>
+                            ) : creditForm.bank === 'any' ? (
+                              'Любой банк'
+                            ) : null}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {settings?.partners?.map((partner) => (
