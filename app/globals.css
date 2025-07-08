@@ -223,26 +223,26 @@
 
   .hero-bg-desktop {
     background-size: cover !important;
-    background-position: center 45% !important;
+    background-position: center 25% !important;
     background-repeat: no-repeat !important;
   }
 
   /* Дополнительные настройки для больших экранов */
   @media (min-width: 1024px) {
     .hero-bg-desktop {
-      background-position: center 40% !important;
+      background-position: center 20% !important;
     }
   }
 
   @media (min-width: 1200px) {
     .hero-bg-desktop {
-      background-position: center 35% !important;
+      background-position: center 15% !important;
     }
   }
 
   @media (min-width: 1440px) {
     .hero-bg-desktop {
-      background-position: center 30% !important;
+      background-position: center 10% !important;
     }
   }
 
@@ -253,7 +253,7 @@
     }
 
     .hero-bg-desktop {
-      background-position: center 50% !important;
+      background-position: center 30% !important;
     }
   }
 
@@ -264,7 +264,7 @@
     }
 
     .hero-bg-desktop {
-      background-position: center 45% !important;
+      background-position: center 25% !important;
     }
   }
 
