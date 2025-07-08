@@ -1,0 +1,206 @@
+From 653ab2db7e62b449de4e142404938e5b58ef5fdb Mon Sep 17 00:00:00 2001
+From: Autobel Bot <bot@autobel.by>
+Date: Fri, 4 Jul 2025 09:08:29 +0000
+Subject: [PATCH] =?UTF-8?q?=D0=98=D1=81=D0=BF=D1=80=D0=B0=D0=B2=D0=BB?=
+ =?UTF-8?q?=D0=B5=D0=BD=D0=B0=20=D0=BE=D1=88=D0=B8=D0=B1=D0=BA=D0=B0=20'Ca?=
+ =?UTF-8?q?nnot=20read=20properties=20of=20undefined=20(reading=20map)'=20?=
+ =?UTF-8?q?=D0=BD=D0=B0=20=D1=81=D1=82=D1=80=D0=B0=D0=BD=D0=B8=D1=86=D0=B5?=
+ =?UTF-8?q?=20=D0=BA=D1=80=D0=B5=D0=B4=D0=B8=D1=82?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Добавлены проверки безопасности для массивов partners и benefits
+- Исправлены все функции работы с массивом partners в админке
+- Добавлены fallback значения для всех полей при загрузке данных
+- Теперь страница кредит корректно работает даже при отсутствии данных в Firebase
+---
+ .same/todos.md                    | 28 +++++++-----------
+ app/credit/page.tsx               | 49 +++++++++++++++++++++++++++++--
+ components/admin/admin-credit.tsx | 35 ++++++++++++++++++----
+ 3 files changed, 86 insertions(+), 26 deletions(-)
+
+diff --git a/.same/todos.md b/.same/todos.md
+index 6ccd682..55fb491 100644
+--- a/.same/todos.md
++++ b/.same/todos.md
+@@ -1,20 +1,12 @@
+-# Задачи по улучшению прелоадеров
++# Задачи по исправлению ошибки на странице кредит
+ 
+-## Завершенные задачи:
+-- [x] Изучить структуру проекта и найти компоненты каталога
+-- [x] Добавить прелоадеры для элементов каталога и их картинок
+-- [x] Добавить плавное появление картинок на главной
+-- [x] Исправить проблему с картой в контактах (убрать сообщение о API ключе)
+-- [x] Настроить git и сделать push изменений
++## Текущие проблемы
++- [ ] Ошибка "Cannot read properties of undefined (reading 'map')" на странице кредит при добавлении банков
++- [ ] Ошибка в файле 117-7f39e42607992981.js связанная с undefined данными
+ 
+-## Реализованные улучшения:
+-- ✅ Создан компонент CarCardSkeleton с красивой shimmer анимацией
+-- ✅ Создан компонент FadeInImage для плавной загрузки изображений
+-- ✅ Обновлена главная страница с прелоадерами и fade-in анимациями
+-- ✅ Обновлен каталог с прелоадерами и поэтапным появлением карточек
+-- ✅ Исправлена карта в контактах - убрано сообщение об API ключе
+-- ✅ Добавлены анимации shimmer и fade-in в tailwind config
+-- ✅ Успешно выполнен commit и push в GitHub
+-
+-## Результат:
+-Все задачи выполнены успешно! Пользовательский опыт значительно улучшен.
++## План действий
++1. [ ] Изучить код страницы кредит
++2. [ ] Найти компонент, который работает с банками
++3. [ ] Исправить ошибку с undefined массивом при вызове map()
++4. [ ] Запустить сервер и протестировать
++5. [ ] Сделать коммит изменений
+diff --git a/app/credit/page.tsx b/app/credit/page.tsx
+index c1d720d..f57d7cf 100644
+--- a/app/credit/page.tsx
++++ b/app/credit/page.tsx
+@@ -101,7 +101,50 @@ export default function CreditPage() {
+     try {
+       const pageDoc = await getDoc(doc(db, "pages", "credit"))
+       if (pageDoc.exists()) {
+-        setSettings(pageDoc.data() as CreditPageSettings)
++        const data = pageDoc.data() as CreditPageSettings
++        // Проверяем что все необходимые поля существуют
++        setSettings({
++          title: data.title || "Автокредит на выгодных условиях",
++          subtitle: data.subtitle || "Получите кредит на автомобиль мечты уже сегодня",
++          description: data.description || "Мы работаем с ведущими банками Беларуси и поможем вам получить автокредит на самых выгодных условиях. Минимальный пакет документов, быстрое рассмотрение заявки.",
++          benefits: data.benefits || [
++            {
++              icon: "percent",
++              title: "Низкие процентные ставки",
++              description: "От 12% годовых в белорусских рублях",
++            },
++            {
++              icon: "clock",
++              title: "Быстрое оформление",
++              description: "Рассмотрение заявки в течение 1 дня",
++            },
++            {
++              icon: "building",
++              title: "Надежные банки-партнеры",
++              description: "Работаем только с проверенными банками",
++            },
++          ],
++          partners: data.partners || [
++            {
++              name: "Беларусбанк",
++              logoUrl: "/placeholder.svg?height=60&width=120",
++              minRate: 12,
++              maxTerm: 84,
++            },
++            {
++              name: "Альфа-Банк",
++              logoUrl: "/placeholder.svg?height=60&width=120",
++              minRate: 13,
++              maxTerm: 72,
++            },
++            {
++              name: "БПС-Сбербанк",
++              logoUrl: "/placeholder.svg?height=60&width=120",
++              minRate: 14,
++              maxTerm: 60,
++            },
++          ],
++        })
+       }
+     } catch (error) {
+       console.error("Ошибка загрузки настроек страницы кредита:", error)
+@@ -428,7 +471,7 @@ export default function CreditPage() {
+           </div>
+ 
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+-            {settings.benefits.map((benefit, index) => {
++            {settings.benefits && settings.benefits.map((benefit, index) => {
+               const IconComponent = getIcon(benefit.icon)
+               return (
+                 <div key={index} className="text-center group">
+@@ -451,7 +494,7 @@ export default function CreditPage() {
+           </div>
+ 
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+-            {settings.partners.map((partner, index) => (
++            {settings.partners && settings.partners.map((partner, index) => (
+               <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                 <CardContent className="p-6">
+                   <img
+diff --git a/components/admin/admin-credit.tsx b/components/admin/admin-credit.tsx
+index 0e71f82..e5303e9 100644
+--- a/components/admin/admin-credit.tsx
++++ b/components/admin/admin-credit.tsx
+@@ -49,7 +49,32 @@ export default function AdminCredit() {
+     try {
+       const creditDoc = await getDoc(doc(db, "pages", "credit"))
+       if (creditDoc.exists()) {
+-        setCreditData(creditDoc.data())
++        const data = creditDoc.data()
++        setCreditData({
++          title: data.title || "Автокредит на выгодных условиях",
++          subtitle: data.subtitle || "Получите кредит на автомобиль мечты уже сегодня",
++          description: data.description || "Мы работаем с ведущими банками Беларуси и поможем вам получить автокредит на самых выгодных условиях.",
++          partners: data.partners || [
++            {
++              name: "Беларусбанк",
++              logoUrl: "",
++              minRate: 12,
++              maxTerm: 84,
++            },
++            {
++              name: "Альфа-Банк",
++              logoUrl: "",
++              minRate: 13,
++              maxTerm: 72,
++            },
++            {
++              name: "БПС-Сбербанк",
++              logoUrl: "",
++              minRate: 14,
++              maxTerm: 60,
++            },
++          ],
++        })
+       }
+     } catch (error) {
+       console.error("Ошибка загрузки данных:", error)
+@@ -75,7 +100,7 @@ export default function AdminCredit() {
+     setCreditData({
+       ...creditData,
+       partners: [
+-        ...creditData.partners,
++        ...(creditData.partners || []),
+         {
+           name: "",
+           logoUrl: "",
+@@ -87,13 +112,13 @@ export default function AdminCredit() {
+   }
+ 
+   const updatePartner = (index, field, value) => {
+-    const newPartners = [...creditData.partners]
++    const newPartners = [...(creditData.partners || [])]
+     newPartners[index] = { ...newPartners[index], [field]: value }
+     setCreditData({ ...creditData, partners: newPartners })
+   }
+ 
+   const removePartner = (index) => {
+-    const newPartners = creditData.partners.filter((_, i) => i !== index)
++    const newPartners = (creditData.partners || []).filter((_, i) => i !== index)
+     setCreditData({ ...creditData, partners: newPartners })
+   }
+ 
+@@ -162,7 +187,7 @@ export default function AdminCredit() {
+             </div>
+           </CardHeader>
+           <CardContent className="space-y-4">
+-            {creditData.partners.map((partner, index) => (
++            {(creditData.partners || []).map((partner, index) => (
+               <div key={index} className="p-4 bg-slate-700/50 rounded-lg space-y-4">
+                 <div className="flex items-center justify-between">
+                   <h4 className="text-white font-medium">Банк {index + 1}</h4>
+-- 
+2.43.0
+

@@ -1,0 +1,17 @@
+name = "autobel-cache-worker"
+main = "image-cache-worker.js"
+compatibility_date = "2024-12-09"
+
+# Переменные окружения
+[vars]
+FIREBASE_PROJECT_ID = "autobel-a6390"
+
+[env.production]
+name = "autobel-cache-worker"
+routes = [
+  { pattern = "images.belautocenter.by/*", zone_name = "belautocenter.by" },
+  { pattern = "api.belautocenter.by/firestore/*", zone_name = "belautocenter.by" }
+]
+
+[env.development]
+name = "autobel-cache-worker-dev"
