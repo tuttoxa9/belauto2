@@ -217,7 +217,7 @@
   /* Стили для фонового изображения на мобильных устройствах */
   .hero-bg-mobile {
     background-size: cover !important;
-    background-position: center center !important;
+    background-position: center 35% !important;
     background-repeat: no-repeat !important;
   }
 
@@ -240,20 +240,31 @@
     }
   }
 
-  /* Адаптивные отступы для контента */
+  /* Адаптивные настройки для мобильных */
   @media (max-width: 768px) {
+    .hero-bg-mobile {
+      background-position: center 30% !important;
+    }
+
     .hero-content {
       padding-bottom: 8rem !important;
     }
   }
 
   @media (max-width: 480px) {
+    .hero-bg-mobile {
+      background-position: center 25% !important;
+    }
+
     .hero-content {
       padding-bottom: 10rem !important;
     }
   }
 
   @media (max-width: 375px) {
+    .hero-bg-mobile {
+      background-position: center 20% !important;
+    }
 
     .hero-content {
       padding-bottom: 12rem !important;
