@@ -173,16 +173,21 @@ export default function Header() {
           </SheetTrigger>
           <SheetContent side="left" className="w-80">
             <div className="flex items-center space-x-3 mb-8 p-4 border-b">
-              <span className="font-display font-bold text-xl text-gray-900 tracking-tight">
-                {loading ? (
-                  <div className="flex items-center">
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    <span className="font-display">Загрузка...</span>
-                  </div>
-                ) : (
-                  settings?.companyName || "Белавто Центр"
-                )}
-              </span>
+              {loading ? (
+                <div className="flex items-center">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <span className="font-display">Загрузка...</span>
+                </div>
+              ) : (
+                <Image
+                  src="/logo4.png"
+                  alt="Белавто Центр"
+                  width={120}
+                  height={40}
+                  className="h-10 w-auto"
+                  priority
+                />
+              )}
             </div>
             <div className="flex flex-col space-y-6 mt-8">
               {navigation
@@ -214,6 +219,17 @@ export default function Header() {
                   {settings?.phone || "+375 XX XXX-XX-XX"}
                 </a>
               )}
+              <div className="mb-6 space-y-3">
+                <div>
+                  <div className="text-sm font-semibold text-gray-900 mb-1">Адрес:</div>
+                  <div className="text-sm text-gray-600">{settings?.address || "г. Минск, ул. Примерная, 123"}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-gray-900 mb-1">Время работы:</div>
+                  <div className="text-sm text-gray-600">Пн-Пт: 9:00-21:00</div>
+                  <div className="text-sm text-gray-600">Сб-Вс: 10:00-20:00</div>
+                </div>
+              </div>
               <Button
                 className="w-full bg-blue-600 hover:bg-blue-700 font-display font-semibold tracking-wide"
                 onClick={() => {
