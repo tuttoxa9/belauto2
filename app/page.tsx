@@ -155,7 +155,7 @@ export default function HomePage() {
             bottom: '150px', // Заканчиваем фон ДО блока историй
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('${getCachedImageUrl('/mainTouran.PNG')}')`,
             backgroundSize: 'cover',
-            backgroundPosition: 'center 80%',
+            backgroundPosition: 'center 90%',
             backgroundRepeat: 'no-repeat'
           }}
         />
