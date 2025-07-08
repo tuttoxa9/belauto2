@@ -143,17 +143,17 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-100 homepage -mt-14">
       {/* Главный баннер */}
-      <section className="relative h-[70vh] sm:h-[75vh] flex items-center justify-center pt-14">
+      <section className="relative min-h-[80vh] sm:h-[75vh] flex items-center justify-center pt-14">
 
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center hero-bg"
           style={{
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('${getCachedImageUrl('/mainTouran.PNG')}')`,
-            backgroundSize: 'cover'
+            backgroundPosition: 'center center'
           }}
         />
 
-        <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4 -mt-16 sm:-mt-20">
+        <div className="relative z-30 text-center text-white max-w-4xl mx-auto px-4 pb-24 sm:pb-20 md:pb-16 hero-content">
           <h1 className="text-hero text-2xl sm:text-3xl md:text-6xl mb-4 sm:mb-6 leading-tight">
             Найди свой <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">идеальный автомобиль</span> надежным способом
           </h1>
@@ -161,13 +161,15 @@ export default function HomePage() {
             {settings.heroSubtitle}
           </p>
 
-          <Button
-            size="lg"
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-base sm:text-lg px-6 sm:px-10 py-4 sm:py-6 rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-            asChild
-          >
-            <a href="/catalog">{settings.heroButtonText}</a>
-          </Button>
+          <div className="relative z-50">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-base sm:text-lg px-6 sm:px-10 py-4 sm:py-6 rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              asChild
+            >
+              <a href="/catalog">{settings.heroButtonText}</a>
+            </Button>
+          </div>
         </div>
 
         {/* Закругленный переход с Stories */}

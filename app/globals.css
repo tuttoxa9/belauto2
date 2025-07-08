@@ -213,4 +213,41 @@
     font-weight: 400;
     letter-spacing: 0.025em;
   }
+
+  /* Адаптивное фоновое изображение для мобильных устройств */
+  @media (max-width: 768px) {
+    .hero-bg {
+      background-size: contain !important;
+      background-repeat: no-repeat !important;
+      background-position: center center !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-bg {
+      background-size: 85% auto !important;
+      background-position: center center !important;
+    }
+
+    .hero-content {
+      padding-bottom: 10rem !important;
+    }
+  }
+
+  @media (max-width: 375px) {
+    .hero-bg {
+      background-size: 80% auto !important;
+    }
+
+    .hero-content {
+      padding-bottom: 12rem !important;
+    }
+  }
+
+  /* Обеспечиваем достаточное пространство для кнопки на мобильных */
+  @media (max-width: 768px) {
+    .hero-content {
+      padding-bottom: 8rem !important;
+    }
+  }
 }
