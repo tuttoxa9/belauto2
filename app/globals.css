@@ -243,31 +243,31 @@
   /* Адаптивные настройки для мобильных */
   @media (max-width: 768px) {
     .hero-bg-mobile {
-      background-position: center 65% !important;
+      background-position: center 50% !important;
     }
 
     .hero-content {
-      padding-bottom: 8rem !important;
+      padding-bottom: 2rem !important;
     }
   }
 
   @media (max-width: 480px) {
     .hero-bg-mobile {
-      background-position: center 70% !important;
+      background-position: center 45% !important;
     }
 
     .hero-content {
-      padding-bottom: 10rem !important;
+      padding-bottom: 1.5rem !important;
     }
   }
 
   @media (max-width: 375px) {
     .hero-bg-mobile {
-      background-position: center 75% !important;
+      background-position: center 40% !important;
     }
 
     .hero-content {
-      padding-bottom: 12rem !important;
+      padding-bottom: 1rem !important;
     }
   }
 }
