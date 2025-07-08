@@ -49,6 +49,14 @@ export default function CreditPage() {
     interestRate: [15],
   })
 
+  const [manualInputs, setManualInputs] = useState({
+    carPrice: '',
+    downPayment: '',
+    loanTerm: '',
+    interestRate: '',
+    selectedBank: ''
+  })
+
   const [creditForm, setCreditForm] = useState({
     name: "",
     phone: "",
@@ -62,6 +70,17 @@ export default function CreditPage() {
 
   useEffect(() => {
     loadSettings()
+  }, [])
+
+  useEffect(() => {
+    // Инициализируем ручные поля значениями слайдеров
+    setManualInputs({
+      carPrice: calculator.carPrice[0].toString(),
+      downPayment: calculator.downPayment[0].toString(),
+      loanTerm: calculator.loanTerm[0].toString(),
+      interestRate: calculator.interestRate[0].toString(),
+      selectedBank: ''
+    })
   }, [])
 
   const loadSettings = async () => {
@@ -139,6 +158,12 @@ export default function CreditPage() {
         carPrice: [Math.round(calculator.carPrice[0] * usdBynRate)],
         downPayment: [Math.round(calculator.downPayment[0] * usdBynRate)]
       })
+      // Обновляем ручные поля
+      setManualInputs({
+        ...manualInputs,
+        carPrice: Math.round(calculator.carPrice[0] * usdBynRate).toString(),
+        downPayment: Math.round(calculator.downPayment[0] * usdBynRate).toString()
+      })
     } else {
       // Переключение на USD
       setCalculator({
@@ -146,6 +171,47 @@ export default function CreditPage() {
         carPrice: [Math.round(calculator.carPrice[0] / usdBynRate)],
         downPayment: [Math.round(calculator.downPayment[0] / usdBynRate)]
       })
+      // Обновляем ручные поля
+      setManualInputs({
+        ...manualInputs,
+        carPrice: Math.round(calculator.carPrice[0] / usdBynRate).toString(),
+        downPayment: Math.round(calculator.downPayment[0] / usdBynRate).toString()
+      })
+    }
+  }
+
+  const handleManualInputChange = (field: string, value: string) => {
+    setManualInputs({ ...manualInputs, [field]: value })
+
+    const numValue = parseFloat(value) || 0
+
+    switch (field) {
+      case 'carPrice':
+        setCalculator({ ...calculator, carPrice: [numValue] })
+        break
+      case 'downPayment':
+        setCalculator({ ...calculator, downPayment: [numValue] })
+        break
+      case 'loanTerm':
+        setCalculator({ ...calculator, loanTerm: [numValue] })
+        break
+      case 'interestRate':
+        setCalculator({ ...calculator, interestRate: [numValue] })
+        break
+    }
+  }
+
+  const handleBankSelection = (bankValue: string) => {
+    setManualInputs({ ...manualInputs, selectedBank: bankValue })
+
+    if (bankValue !== 'custom' && settings?.partners) {
+      const selectedBank = settings.partners.find(partner =>
+        partner.name.toLowerCase().replace(/[\s-]/g, '') === bankValue
+      )
+      if (selectedBank) {
+        setCalculator({ ...calculator, interestRate: [selectedBank.minRate] })
+        setManualInputs({ ...manualInputs, selectedBank: bankValue, interestRate: selectedBank.minRate.toString() })
+      }
     }
   }
 
@@ -319,50 +385,145 @@ export default function CreditPage() {
 
                 <div>
                   <Label>Стоимость автомобиля: {formatCurrency(calculator.carPrice[0])}</Label>
-                  <Slider
-                    value={calculator.carPrice}
-                    onValueChange={(value) => setCalculator({ ...calculator, carPrice: value })}
-                    max={getCreditMaxValue()}
-                    min={getCreditMinValue()}
-                    step={isBelarusianRubles ? 500 : 1000}
-                    className="mt-2"
-                  />
+                  <div className="space-y-2 mt-2">
+                    <Slider
+                      value={calculator.carPrice}
+                      onValueChange={(value) => {
+                        setCalculator({ ...calculator, carPrice: value })
+                        setManualInputs({ ...manualInputs, carPrice: value[0].toString() })
+                      }}
+                      max={getCreditMaxValue()}
+                      min={getCreditMinValue()}
+                      step={isBelarusianRubles ? 500 : 1000}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Введите стоимость"
+                      value={manualInputs.carPrice}
+                      onChange={(e) => handleManualInputChange('carPrice', e.target.value)}
+                      className="text-sm"
+                      min={getCreditMinValue()}
+                      max={getCreditMaxValue()}
+                    />
+                  </div>
                 </div>
 
                 <div>
                   <Label>Первоначальный взнос: {formatCurrency(calculator.downPayment[0])}</Label>
-                  <Slider
-                    value={calculator.downPayment}
-                    onValueChange={(value) => setCalculator({ ...calculator, downPayment: value })}
-                    max={calculator.carPrice[0] * 0.8}
-                    min={calculator.carPrice[0] * 0.1}
-                    step={isBelarusianRubles ? 200 : 500}
-                    className="mt-2"
-                  />
+                  <div className="space-y-2 mt-2">
+                    <Slider
+                      value={calculator.downPayment}
+                      onValueChange={(value) => {
+                        setCalculator({ ...calculator, downPayment: value })
+                        setManualInputs({ ...manualInputs, downPayment: value[0].toString() })
+                      }}
+                      max={calculator.carPrice[0] * 0.8}
+                      min={calculator.carPrice[0] * 0.1}
+                      step={isBelarusianRubles ? 200 : 500}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Введите первоначальный взнос"
+                      value={manualInputs.downPayment}
+                      onChange={(e) => handleManualInputChange('downPayment', e.target.value)}
+                      className="text-sm"
+                      min={calculator.carPrice[0] * 0.1}
+                      max={calculator.carPrice[0] * 0.8}
+                    />
+                  </div>
                 </div>
 
                 <div>
                   <Label>Срок кредита: {calculator.loanTerm[0]} мес.</Label>
-                  <Slider
-                    value={calculator.loanTerm}
-                    onValueChange={(value) => setCalculator({ ...calculator, loanTerm: value })}
-                    max={84}
-                    min={12}
-                    step={3}
-                    className="mt-2"
-                  />
+                  <div className="space-y-2 mt-2">
+                    <Slider
+                      value={calculator.loanTerm}
+                      onValueChange={(value) => {
+                        setCalculator({ ...calculator, loanTerm: value })
+                        setManualInputs({ ...manualInputs, loanTerm: value[0].toString() })
+                      }}
+                      max={84}
+                      min={12}
+                      step={3}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Введите срок в месяцах"
+                      value={manualInputs.loanTerm}
+                      onChange={(e) => handleManualInputChange('loanTerm', e.target.value)}
+                      className="text-sm"
+                      min={12}
+                      max={84}
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <Label>Процентная ставка: {calculator.interestRate[0]}%</Label>
-                  <Slider
-                    value={calculator.interestRate}
-                    onValueChange={(value) => setCalculator({ ...calculator, interestRate: value })}
-                    max={25}
-                    min={10}
-                    step={0.25}
-                    className="mt-2"
-                  />
+                  <Label>Выберите банк или установите ставку вручную</Label>
+                  <div className="space-y-3 mt-2">
+                    <Select
+                      value={manualInputs.selectedBank}
+                      onValueChange={handleBankSelection}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите банк" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {settings?.partners?.map((partner) => (
+                          <SelectItem
+                            key={partner.name}
+                            value={partner.name.toLowerCase().replace(/[\s-]/g, '')}
+                            className="pr-16"
+                          >
+                            <div className="flex items-center justify-between w-full relative">
+                              <div className="flex items-center gap-2">
+                                {partner.logoUrl && (
+                                  <Image
+                                    src={getCachedImageUrl(partner.logoUrl)}
+                                    alt={`${partner.name} логотип`}
+                                    width={20}
+                                    height={20}
+                                    className="object-contain rounded"
+                                  />
+                                )}
+                                <span>{partner.name}</span>
+                              </div>
+                              <span className="absolute right-2 text-sm font-semibold text-slate-600">{partner.minRate}%</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="custom">Ввести ставку вручную</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <div>
+                      <Label>Процентная ставка: {calculator.interestRate[0]}%</Label>
+                      <div className="space-y-2 mt-1">
+                        <Slider
+                          value={calculator.interestRate}
+                          onValueChange={(value) => {
+                            setCalculator({ ...calculator, interestRate: value })
+                            setManualInputs({ ...manualInputs, interestRate: value[0].toString() })
+                          }}
+                          max={25}
+                          min={10}
+                          step={0.25}
+                          disabled={manualInputs.selectedBank !== '' && manualInputs.selectedBank !== 'custom'}
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Введите процентную ставку"
+                          value={manualInputs.interestRate}
+                          onChange={(e) => handleManualInputChange('interestRate', e.target.value)}
+                          className="text-sm"
+                          min={10}
+                          max={25}
+                          step={0.25}
+                          disabled={manualInputs.selectedBank !== '' && manualInputs.selectedBank !== 'custom'}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="bg-blue-50 p-4 rounded-lg space-y-2">
