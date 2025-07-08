@@ -52,10 +52,10 @@ export const metadata: Metadata = {
     description: 'Большой выбор качественных автомобилей с пробегом. Гарантия, кредит, лизинг. Более 500 проверенных автомобилей в наличии в Минске.',
     images: [
       {
-        url: 'https://autobelcenter.by/logo.png',
+        url: 'https://autobelcenter.by/social-preview.jpg',
         width: 1200,
         height: 630,
-        alt: 'Белавто Центр - логотип',
+        alt: 'Белавто Центр - автомобили с пробегом в Беларуси',
       },
     ],
   },
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Белавто Центр - Продажа автомобилей с пробегом в Беларуси',
     description: 'Большой выбор качественных автомобилей с пробегом. Гарантия, кредит, лизинг.',
-    images: ['https://autobelcenter.by/logo.png'],
+    images: ['https://autobelcenter.by/social-preview.jpg'],
     creator: '@autobelcenter',
   },
   verification: {
