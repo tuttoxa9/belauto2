@@ -99,10 +99,23 @@ export default function YandexMap({ address, className }: YandexMapProps) {
   if (!apiKey) {
     return (
       <div className={className}>
-        <div className="w-full h-full min-h-[300px] flex items-center justify-center bg-gray-100 rounded-lg">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-            <p className="text-gray-500">Загрузка карты...</p>
+        <div className="w-full h-full min-h-[300px] bg-gray-200 rounded-lg animate-pulse relative overflow-hidden">
+          {/* Скелетон карты */}
+          <div className="absolute inset-4">
+            <div className="grid grid-cols-4 gap-2 h-full">
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="bg-gray-300 rounded opacity-50 animate-pulse" style={{animationDelay: `${i * 0.1}s`}}></div>
+              ))}
+            </div>
+          </div>
+          {/* Имитация элементов управления картой */}
+          <div className="absolute top-2 right-2 space-y-1">
+            <div className="w-8 h-8 bg-gray-300 rounded animate-pulse"></div>
+            <div className="w-8 h-8 bg-gray-300 rounded animate-pulse"></div>
+          </div>
+          {/* Имитация маркера */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="w-6 h-6 bg-red-300 rounded-full animate-pulse"></div>
           </div>
         </div>
       </div>
@@ -117,10 +130,23 @@ export default function YandexMap({ address, className }: YandexMapProps) {
         style={{ display: mapLoaded ? "block" : "none" }}
       />
       {!mapLoaded && (
-        <div className="w-full h-full min-h-[300px] flex items-center justify-center bg-gray-100 rounded-lg">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-            <p className="text-gray-500">Загрузка карты...</p>
+        <div className="w-full h-full min-h-[300px] bg-gray-200 rounded-lg animate-pulse relative overflow-hidden">
+          {/* Скелетон карты */}
+          <div className="absolute inset-4">
+            <div className="grid grid-cols-4 gap-2 h-full">
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="bg-gray-300 rounded opacity-50 animate-pulse" style={{animationDelay: `${i * 0.1}s`}}></div>
+              ))}
+            </div>
+          </div>
+          {/* Имитация элементов управления картой */}
+          <div className="absolute top-2 right-2 space-y-1">
+            <div className="w-8 h-8 bg-gray-300 rounded animate-pulse"></div>
+            <div className="w-8 h-8 bg-gray-300 rounded animate-pulse"></div>
+          </div>
+          {/* Имитация маркера */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="w-6 h-6 bg-red-300 rounded-full animate-pulse"></div>
           </div>
         </div>
       )}
