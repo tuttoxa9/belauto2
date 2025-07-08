@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
         break
 
       case 'credit_request':
-        message = `💳 <b>Новая заявка на кредит</b>\n\n👤 <b>Имя:</b> ${name}\n📞 <b>Телефон:</b> ${phone}\n📧 <b>Email:</b> ${email}\n💰 <b>Стоимость авто:</b> ${carPrice} BYN\n💵 <b>Первый взнос:</b> ${downPayment} BYN\n📅 <b>Срок кредита:</b> ${loanTerm} мес.\n🏦 <b>Банк:</b> ${bank}`
+        message = `💳 <b>Новая заявка на кредит</b>\n\n👤 <b>Имя:</b> ${name}\n📞 <b>Телефон:</b> ${phone}\n💰 <b>Стоимость авто:</b> ${carPrice} BYN\n💵 <b>Первый взнос:</b> ${downPayment} BYN\n📅 <b>Срок кредита:</b> ${loanTerm} мес.\n🏦 <b>Банк:</b> ${bank}`
         if (userMessage) {
           message += `\n📝 <b>Сообщение:</b> ${userMessage}`
         }
