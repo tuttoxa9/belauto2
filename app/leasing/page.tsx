@@ -287,7 +287,7 @@ export default function LeasingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-green-50">
+    <div className="min-h-screen bg-gray-50">
       <div className="container px-4 py-8">
         {/* Хлебные крошки */}
         <nav className="mb-6">
@@ -303,18 +303,10 @@ export default function LeasingPage() {
         </nav>
 
         {/* Заголовок */}
-        <div className="text-center mb-16">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              {settings?.title}
-            </h1>
-            <p className="text-2xl text-gray-600 mb-8 font-light">
-              {settings?.subtitle}
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              {settings?.description}
-            </p>
-          </div>
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">{settings?.title}</h1>
+          <p className="text-xl text-gray-600 mb-6">{settings?.subtitle}</p>
+          <p className="text-gray-700 max-w-3xl mx-auto">{settings?.description}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -325,15 +317,14 @@ export default function LeasingPage() {
 
           {/* Форма заявки на лизинг */}
           <div>
-            <Card className="shadow-xl border-0 bg-white/95 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-xl">
-                <CardTitle className="flex items-center text-xl">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
                   <Car className="h-6 w-6 mr-2" />
                   Заявка на лизинг
                 </CardTitle>
-                <p className="text-blue-100 text-sm">Заполните форму для получения индивидуального предложения</p>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Выбор типа клиента */}
                   <div>
@@ -515,7 +506,7 @@ export default function LeasingPage() {
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+                    className="w-full"
                   >
                     <CheckCircle className="h-5 w-5 mr-2" />
                     Отправить заявку на лизинг
@@ -526,83 +517,107 @@ export default function LeasingPage() {
           </div>
         </div>
 
-        {/* Условия лизинга */}
-        <LeasingConditions
-          conditions={settings?.conditions}
-          additionalNote={settings?.additionalNote}
-        />
 
-        {/* Преимущества */}
-        {settings?.benefits && settings.benefits.length > 0 && (
-          <section className="py-20 bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 -mx-4 mt-16">
-            <div className="container px-4">
-              <div className="text-center mb-16">
-                <h2 className="text-4xl font-bold text-gray-900 mb-6">Преимущества лизинга</h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                  Узнайте, почему лизинг — это выгодное решение для развития вашего бизнеса
-                </p>
+
+
+
+        {/* Лизинговые компании и Преимущества */}
+        <section className="py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Лизинговые компании (слева) */}
+            <div>
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">Наши лизинговые партнеры</h2>
+                <p className="text-gray-600">Работаем с ведущими лизинговыми компаниями Беларуси</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {settings.benefits.map((benefit, index) => {
-                  const IconComponent = getIcon(benefit.icon)
-                  return (
-                    <Card key={index} className="text-center group hover:shadow-2xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm hover:scale-105">
-                      <CardContent className="p-8">
-                        <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                          <IconComponent className="h-10 w-10 text-white" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {settings?.leasingCompanies?.map((company, index) => (
+                  <Card key={index} className="group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border-l-4 border-l-green-500 hover:border-l-green-600">
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-green-50 to-green-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-green-100 group-hover:to-green-200 transition-colors">
+                          <img
+                            src={company.logoUrl || "/placeholder.svg"}
+                            alt={company.name}
+                            className="h-8 w-10 object-contain"
+                          />
                         </div>
-                        <h3 className="text-2xl font-bold mb-4 text-gray-900">{benefit.title}</h3>
-                        <p className="text-gray-600 leading-relaxed">{benefit.description}</p>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Лизинговые компании */}
-        {settings?.leasingCompanies && settings.leasingCompanies.length > 0 && (
-          <section className="py-20 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 -mx-4 mt-8">
-            <div className="container px-4">
-              <div className="text-center mb-16">
-                <h2 className="text-4xl font-bold text-gray-900 mb-6">Наши партнеры по лизингу</h2>
-                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                  Работаем с ведущими лизинговыми компаниями Беларуси для обеспечения лучших условий
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {settings.leasingCompanies.map((company, index) => (
-                  <Card key={index} className="text-center hover:shadow-2xl transition-all duration-500 border-0 bg-white/90 backdrop-blur-sm group hover:scale-105">
-                    <CardContent className="p-8">
-                      <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                        <img
-                          src={company.logoUrl || "/placeholder.svg"}
-                          alt={company.name}
-                          className="h-12 w-12 object-contain"
-                        />
-                      </div>
-                      <h3 className="text-2xl font-bold mb-4 text-gray-900">{company.name}</h3>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-center space-x-2 text-gray-600">
-                          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                          <span>Аванс от {company.minAdvance}%</span>
-                        </div>
-                        <div className="flex items-center justify-center space-x-2 text-gray-600">
-                          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                          <span>Срок до {company.maxTerm} месяцев</span>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-green-600 transition-colors">
+                            {company.name}
+                          </h3>
+                          <div className="flex items-center space-x-3 text-sm">
+                            <div className="flex items-center space-x-1">
+                              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                              <span className="text-gray-600">от {company.minAdvance}%</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                              <span className="text-gray-600">до {company.maxTerm} мес.</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
+
+              {/* Дополнительная информация */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100">
+                <div className="flex items-start space-x-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Building className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Персональные условия</h4>
+                    <p className="text-sm text-gray-600">
+                      Обращайтесь к нам для получения индивидуального предложения с учётом ваших потребностей
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </section>
-        )}
+
+            {/* Преимущества и Условия (справа) */}
+            <div className="space-y-12">
+              {/* Преимущества */}
+              {settings?.benefits && settings.benefits.length > 0 && (
+                <div>
+                  <div className="mb-8">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-4">Преимущества лизинга</h2>
+                  </div>
+
+                  <div className="space-y-6">
+                    {settings.benefits.map((benefit, index) => {
+                      const IconComponent = getIcon(benefit.icon)
+                      return (
+                        <div key={index} className="flex items-start space-x-4 group">
+                          <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                            <IconComponent className="h-6 w-6 text-green-600" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold mb-2">{benefit.title}</h3>
+                            <p className="text-gray-600 text-sm leading-relaxed">{benefit.description}</p>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Условия лизинга */}
+              <div>
+                <LeasingConditions
+                  conditions={settings?.conditions}
+                  additionalNote={settings?.additionalNote}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   )

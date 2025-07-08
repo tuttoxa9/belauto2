@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calculator, Coins, TrendingUp } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Calculator } from "lucide-react"
 import { doc, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { useUsdBynRate } from "@/components/providers/usd-byn-rate-provider"
@@ -30,18 +32,37 @@ interface LeasingCalculatorData {
 export default function LeasingCalculator() {
   const [data, setData] = useState<LeasingCalculatorData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isBelarusianRubles, setIsBelarusianRubles] = useState(false)
   const usdBynRate = useUsdBynRate()
 
   const [calculator, setCalculator] = useState({
-    carPrice: [80000],
-    advance: [16000],
+    carPrice: [50000],
+    advance: [15000],
     leasingTerm: [36],
     residualValue: [20],
-    selectedCompany: "",
+  })
+
+  const [manualInputs, setManualInputs] = useState({
+    carPrice: '',
+    advance: '',
+    leasingTerm: '',
+    residualValue: '',
+    selectedCompany: ''
   })
 
   useEffect(() => {
     loadCalculatorData()
+  }, [])
+
+  useEffect(() => {
+    // Инициализируем ручные поля значениями слайдеров
+    setManualInputs({
+      carPrice: calculator.carPrice[0].toString(),
+      advance: calculator.advance[0].toString(),
+      leasingTerm: calculator.leasingTerm[0].toString(),
+      residualValue: calculator.residualValue[0].toString(),
+      selectedCompany: ''
+    })
   }, [])
 
   const loadCalculatorData = async () => {
@@ -56,8 +77,8 @@ export default function LeasingCalculator() {
         // Устанавливаем значения по умолчанию из БД
         setCalculator(prev => ({
           ...prev,
-          carPrice: [data.defaultCarPrice || 80000],
-          advance: [Math.round((data.defaultCarPrice || 80000) * (data.defaultAdvancePercent || 20) / 100)],
+          carPrice: [data.defaultCarPrice || 50000],
+          advance: [Math.round((data.defaultCarPrice || 50000) * (data.defaultAdvancePercent || 30) / 100)],
           leasingTerm: [data.defaultTerm || 36],
           residualValue: [data.defaultResidualPercent || 20],
         }))
@@ -69,8 +90,8 @@ export default function LeasingCalculator() {
             { name: "Лизинг-Центр", minAdvance: 20, maxTerm: 72, interestRate: 9.0 },
             { name: "АвтоЛизинг", minAdvance: 10, maxTerm: 48, interestRate: 7.8 },
           ],
-          defaultCarPrice: 80000,
-          defaultAdvancePercent: 20,
+          defaultCarPrice: 50000,
+          defaultAdvancePercent: 30,
           defaultTerm: 36,
           defaultResidualPercent: 20,
         }
@@ -84,8 +105,8 @@ export default function LeasingCalculator() {
   }
 
   const getSelectedCompany = () => {
-    if (!data || !calculator.selectedCompany) return null
-    return data.companies.find(c => c.name === calculator.selectedCompany)
+    if (!data || !manualInputs.selectedCompany) return null
+    return data.companies.find(c => c.name.toLowerCase().replace(/[\s-]/g, '') === manualInputs.selectedCompany)
   }
 
   const calculateMonthlyPayment = () => {
@@ -93,41 +114,109 @@ export default function LeasingCalculator() {
     const advance = calculator.advance[0]
     const term = calculator.leasingTerm[0]
     const residualValue = (carPrice * calculator.residualValue[0]) / 100
-    const company = getSelectedCompany()
 
     const leasingAmount = carPrice - advance - residualValue
 
-    if (company && company.interestRate > 0) {
-      // Расчет с процентной ставкой
-      const monthlyRate = company.interestRate / 100 / 12
-      const monthlyPayment = (leasingAmount * monthlyRate * Math.pow(1 + monthlyRate, term)) /
-                            (Math.pow(1 + monthlyRate, term) - 1)
-      return monthlyPayment
-    } else {
-      // Простой расчет без процентов
-      return leasingAmount / term
-    }
+    // Простой расчет без процентов для лизинга
+    return leasingAmount / term
   }
 
-  const formatCurrency = (amount: number, showByn = true) => {
-    const usdFormatted = new Intl.NumberFormat("en-US", {
+  const formatCurrency = (amount: number) => {
+    if (isBelarusianRubles) {
+      return new Intl.NumberFormat("ru-BY", {
+        style: "currency",
+        currency: "BYN",
+        minimumFractionDigits: 0,
+      }).format(amount)
+    }
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 0,
     }).format(amount)
+  }
 
-    if (showByn && usdBynRate) {
-      const bynAmount = convertUsdToByn(amount, usdBynRate)
-      return `${usdFormatted} (≈ ${bynAmount} BYN)`
+  const getLeasingMinValue = () => {
+    return isBelarusianRubles ? 3000 : 1000
+  }
+
+  const getLeasingMaxValue = () => {
+    return isBelarusianRubles ? 300000 : 100000
+  }
+
+  const handleCurrencyChange = (checked: boolean) => {
+    setIsBelarusianRubles(checked)
+
+    if (!usdBynRate) return
+
+    if (checked) {
+      // Переключение на BYN
+      const newCarPrice = Math.max(3000, Math.round(calculator.carPrice[0] * usdBynRate))
+      const newAdvance = Math.max(300, Math.round(calculator.advance[0] * usdBynRate))
+
+      setCalculator({
+        ...calculator,
+        carPrice: [newCarPrice],
+        advance: [newAdvance]
+      })
+      setManualInputs({
+        ...manualInputs,
+        carPrice: newCarPrice.toString(),
+        advance: newAdvance.toString()
+      })
+    } else {
+      // Переключение на USD
+      const newCarPrice = Math.max(1000, Math.round(calculator.carPrice[0] / usdBynRate))
+      const newAdvance = Math.max(100, Math.round(calculator.advance[0] / usdBynRate))
+
+      setCalculator({
+        ...calculator,
+        carPrice: [newCarPrice],
+        advance: [newAdvance]
+      })
+      setManualInputs({
+        ...manualInputs,
+        carPrice: newCarPrice.toString(),
+        advance: newAdvance.toString()
+      })
     }
+  }
 
-    return usdFormatted
+  const handleManualInputChange = (field: string, value: string) => {
+    setManualInputs({ ...manualInputs, [field]: value })
+
+    const numValue = parseFloat(value) || 0
+
+    switch (field) {
+      case 'carPrice':
+        const clampedCarPrice = Math.max(getLeasingMinValue(), Math.min(getLeasingMaxValue(), numValue))
+        setCalculator({ ...calculator, carPrice: [clampedCarPrice] })
+        break
+      case 'advance':
+        const minAdvance = calculator.carPrice[0] * 0.1
+        const maxAdvance = calculator.carPrice[0] * 0.8
+        const clampedAdvance = Math.max(minAdvance, Math.min(maxAdvance, numValue))
+        setCalculator({ ...calculator, advance: [clampedAdvance] })
+        break
+      case 'leasingTerm':
+        const clampedTerm = Math.max(12, Math.min(84, numValue))
+        setCalculator({ ...calculator, leasingTerm: [clampedTerm] })
+        break
+      case 'residualValue':
+        const clampedResidual = Math.max(10, Math.min(50, numValue))
+        setCalculator({ ...calculator, residualValue: [clampedResidual] })
+        break
+    }
+  }
+
+  const handleCompanySelection = (companyValue: string) => {
+    setManualInputs({ ...manualInputs, selectedCompany: companyValue })
   }
 
   const monthlyPayment = calculateMonthlyPayment()
-  const residualValue = (calculator.carPrice[0] * calculator.residualValue[0]) / 100
+  const leasingSum = calculator.carPrice[0] - calculator.advance[0] - (calculator.carPrice[0] * calculator.residualValue[0] / 100)
   const totalPayments = monthlyPayment * calculator.leasingTerm[0] + calculator.advance[0]
-  const totalInterest = totalPayments - calculator.carPrice[0] + residualValue
+  const residualValue = (calculator.carPrice[0] * calculator.residualValue[0]) / 100
 
   if (loading) {
     return (
@@ -152,172 +241,185 @@ export default function LeasingCalculator() {
   }
 
   return (
-    <Card className="shadow-xl border-0 bg-white/95 backdrop-blur-sm">
-      <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-xl">
-        <CardTitle className="flex items-center text-xl">
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
           <Calculator className="h-6 w-6 mr-2" />
           Лизинговый калькулятор
         </CardTitle>
-        <p className="text-green-100 text-sm">Рассчитайте ежемесячный платеж в долларах и рублях</p>
       </CardHeader>
-      <CardContent className="space-y-6 p-6">
-        <div>
-          <Label className="text-gray-700 font-medium">
-            Стоимость автомобиля: {formatCurrency(calculator.carPrice[0])}
-          </Label>
-          <Slider
-            value={calculator.carPrice}
-            onValueChange={(value) => {
-              const newPrice = value[0]
-              const advancePercent = (calculator.advance[0] / calculator.carPrice[0]) * 100
-              const newAdvance = Math.round((newPrice * advancePercent) / 100)
-              setCalculator({
-                ...calculator,
-                carPrice: value,
-                advance: [newAdvance]
-              })
-            }}
-            max={300000}
-            min={20000}
-            step={5000}
-            className="mt-3"
+      <CardContent className="space-y-4">
+        {/* Переключатель валюты */}
+        <div className="flex items-center space-x-2 p-2 bg-slate-50 rounded-lg">
+          <Checkbox
+            id="currency-switch"
+            checked={isBelarusianRubles}
+            onCheckedChange={handleCurrencyChange}
           />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>$20,000</span>
-            <span>$300,000</span>
+          <Label htmlFor="currency-switch" className="text-sm font-medium">
+            В белорусских рублях
+          </Label>
+        </div>
+
+        {/* Первая строка: Стоимость и Взнос */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label className="text-sm">Стоимость: {formatCurrency(calculator.carPrice[0])}</Label>
+            <div className="space-y-1 mt-1">
+              <Slider
+                value={calculator.carPrice}
+                onValueChange={(value) => {
+                  setCalculator({ ...calculator, carPrice: value })
+                  setManualInputs({ ...manualInputs, carPrice: value[0].toString() })
+                }}
+                max={getLeasingMaxValue()}
+                min={getLeasingMinValue()}
+                step={isBelarusianRubles ? 500 : 1000}
+                className="h-1"
+              />
+              <Input
+                type="number"
+                placeholder="50000"
+                value={manualInputs.carPrice}
+                onChange={(e) => handleManualInputChange('carPrice', e.target.value)}
+                className="text-xs h-8"
+                min={getLeasingMinValue()}
+                max={getLeasingMaxValue()}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-sm">Взнос: {formatCurrency(calculator.advance[0])}</Label>
+            <div className="space-y-1 mt-1">
+              <Slider
+                value={calculator.advance}
+                onValueChange={(value) => {
+                  setCalculator({ ...calculator, advance: value })
+                  setManualInputs({ ...manualInputs, advance: value[0].toString() })
+                }}
+                max={calculator.carPrice[0] * 0.8}
+                min={calculator.carPrice[0] * 0.1}
+                step={isBelarusianRubles ? 200 : 500}
+                className="h-1"
+              />
+              <Input
+                type="number"
+                placeholder="15000"
+                value={manualInputs.advance}
+                onChange={(e) => handleManualInputChange('advance', e.target.value)}
+                className="text-xs h-8"
+                min={calculator.carPrice[0] * 0.1}
+                max={calculator.carPrice[0] * 0.8}
+              />
+            </div>
           </div>
         </div>
 
-        <div>
-          <Label className="text-gray-700 font-medium">
-            Авансовый платеж: {formatCurrency(calculator.advance[0])}
-            <span className="text-sm text-gray-500 ml-2">
-              ({Math.round((calculator.advance[0] / calculator.carPrice[0]) * 100)}%)
-            </span>
-          </Label>
-          <Slider
-            value={calculator.advance}
-            onValueChange={(value) => setCalculator({ ...calculator, advance: value })}
-            max={calculator.carPrice[0] * 0.5}
-            min={calculator.carPrice[0] * 0.1}
-            step={1000}
-            className="mt-3"
-          />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>10%</span>
-            <span>50%</span>
+        {/* Вторая строка: Срок и Остаточная стоимость */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label className="text-sm">Срок: {calculator.leasingTerm[0]} мес.</Label>
+            <div className="space-y-1 mt-1">
+              <Slider
+                value={calculator.leasingTerm}
+                onValueChange={(value) => {
+                  setCalculator({ ...calculator, leasingTerm: value })
+                  setManualInputs({ ...manualInputs, leasingTerm: value[0].toString() })
+                }}
+                max={84}
+                min={12}
+                step={3}
+                className="h-1"
+              />
+              <Input
+                type="number"
+                placeholder="36"
+                value={manualInputs.leasingTerm}
+                onChange={(e) => handleManualInputChange('leasingTerm', e.target.value)}
+                className="text-xs h-8"
+                min={12}
+                max={84}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-sm">Остаточная стоимость: {calculator.residualValue[0]}%</Label>
+            <div className="space-y-1 mt-1">
+              <Slider
+                value={calculator.residualValue}
+                onValueChange={(value) => {
+                  setCalculator({ ...calculator, residualValue: value })
+                  setManualInputs({ ...manualInputs, residualValue: value[0].toString() })
+                }}
+                max={50}
+                min={10}
+                step={5}
+                className="h-1"
+              />
+              <Input
+                type="number"
+                placeholder="20"
+                value={manualInputs.residualValue}
+                onChange={(e) => handleManualInputChange('residualValue', e.target.value)}
+                className="text-xs h-8"
+                min={10}
+                max={50}
+              />
+            </div>
           </div>
         </div>
 
-        <div>
-          <Label className="text-gray-700 font-medium">
-            Срок лизинга: {calculator.leasingTerm[0]} мес.
-          </Label>
-          <Slider
-            value={calculator.leasingTerm}
-            onValueChange={(value) => setCalculator({ ...calculator, leasingTerm: value })}
-            max={84}
-            min={12}
-            step={6}
-            className="mt-3"
-          />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>12 мес.</span>
-            <span>84 мес.</span>
-          </div>
-        </div>
-
-        <div>
-          <Label className="text-gray-700 font-medium">
-            Остаточная стоимость: {calculator.residualValue[0]}%
-          </Label>
-          <Slider
-            value={calculator.residualValue}
-            onValueChange={(value) => setCalculator({ ...calculator, residualValue: value })}
-            max={50}
-            min={10}
-            step={5}
-            className="mt-3"
-          />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>10%</span>
-            <span>50%</span>
-          </div>
-        </div>
-
+        {/* Выбор лизинговой компании */}
         {data && data.companies.length > 0 && (
           <div>
-            <Label className="text-gray-700 font-medium">Лизинговая компания</Label>
+            <Label className="text-sm">Выберите лизинговую компанию или введите ставку вручную</Label>
             <Select
-              value={calculator.selectedCompany}
-              onValueChange={(value) => setCalculator({ ...calculator, selectedCompany: value })}
+              value={manualInputs.selectedCompany}
+              onValueChange={handleCompanySelection}
             >
-              <SelectTrigger className="mt-2">
-                <SelectValue placeholder="Выберите компанию" />
+              <SelectTrigger className="mt-1 h-9">
+                <SelectValue placeholder="Выберите лизинговую компанию" />
               </SelectTrigger>
               <SelectContent>
                 {data.companies.map((company) => (
-                  <SelectItem key={company.name} value={company.name}>
-                    {company.name} (ставка {company.interestRate}%)
+                  <SelectItem
+                    key={company.name}
+                    value={company.name.toLowerCase().replace(/[\s-]/g, '')}
+                  >
+                    {company.name}
                   </SelectItem>
                 ))}
+                <SelectItem value="custom">Ввести условия вручную</SelectItem>
               </SelectContent>
             </Select>
           </div>
         )}
 
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-100">
-          <div className="flex items-center mb-4">
-            <Coins className="h-5 w-5 text-green-600 mr-2" />
-            <h3 className="font-semibold text-gray-900">Расчет платежей</h3>
+        <div className="bg-blue-50 p-4 rounded-lg space-y-2">
+          <div className="flex justify-between">
+            <span>Сумма лизинга:</span>
+            <span className="font-semibold">
+              {formatCurrency(leasingSum)}
+            </span>
           </div>
-
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-700">Авансовый платеж:</span>
-              <span className="font-semibold text-gray-900">
-                {formatCurrency(calculator.advance[0])}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <span className="text-gray-700">Ежемесячный платеж:</span>
-              <span className="font-bold text-green-600 text-lg">
-                {formatCurrency(monthlyPayment)}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <span className="text-gray-700">Остаточная стоимость:</span>
-              <span className="font-semibold text-gray-900">
-                {formatCurrency(residualValue)}
-              </span>
-            </div>
-
-            <div className="border-t border-green-200 pt-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-700">Общая сумма платежей:</span>
-                <span className="font-semibold text-gray-900">
-                  {formatCurrency(totalPayments)}
-                </span>
-              </div>
-
-              {getSelectedCompany() && (
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-gray-700">Переплата:</span>
-                  <span className="font-semibold text-orange-600">
-                    {formatCurrency(totalInterest)}
-                  </span>
-                </div>
-              )}
-            </div>
+          <div className="flex justify-between">
+            <span>Ежемесячный платеж:</span>
+            <span className="font-semibold text-blue-600">{formatCurrency(monthlyPayment)}</span>
           </div>
-
-          {usdBynRate && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center text-sm text-blue-700">
-                <TrendingUp className="h-4 w-4 mr-1" />
-                Курс USD/BYN: {usdBynRate.toFixed(2)}
+          <div className="flex justify-between">
+            <span>Общая сумма выплат:</span>
+            <span className="font-semibold">{formatCurrency(totalPayments)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Остаточная стоимость:</span>
+            <span className="font-semibold">{formatCurrency(residualValue)}</span>
+          </div>
+          {!isBelarusianRubles && usdBynRate && (
+            <div className="pt-2 mt-2 border-t border-blue-200">
+              <div className="text-sm text-blue-700">
+                Ежемесячный платеж: ≈ {convertUsdToByn(monthlyPayment, usdBynRate)} BYN
               </div>
             </div>
           )}
