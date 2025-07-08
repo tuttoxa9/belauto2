@@ -134,13 +134,62 @@ export default function ContactsPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Карта */}
-          <div>
-            <YandexMap address={contactsData.address} className="h-72 lg:h-80 rounded-lg overflow-hidden shadow-lg" />
+          {/* Левая колонка - Карта */}
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Где нас найти</h2>
+              <YandexMap address={contactsData.address} className="h-72 lg:h-80 rounded-lg overflow-hidden shadow-lg" />
+            </div>
+
+            {/* Форма обратной связи под картой */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Остались вопросы? Напишите нам</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Ваше имя</Label>
+                    <Input
+                      id="name"
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                      placeholder="Введите ваше имя"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Номер телефона</Label>
+                    <Input
+                      id="phone"
+                      value={contactForm.phone}
+                      onChange={(e) => setContactForm({ ...contactForm, phone: formatPhoneNumber(e.target.value) })}
+                      placeholder="+375 XX XXX-XX-XX"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="message">Ваше сообщение</Label>
+                    <Textarea
+                      id="message"
+                      value={contactForm.message}
+                      onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                      placeholder="Расскажите, чем мы можем помочь..."
+                      rows={4}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" size="lg" className="w-full">
+                    Отправить сообщение
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Контактная информация */}
+          {/* Правая колонка - Контактная информация */}
           <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Контактная информация</h2>
             {/* Адрес */}
             <Card className="border-0 shadow-sm hover:shadow-md transition-all duration-300 bg-gradient-to-br from-blue-50 to-white group">
               <CardContent className="p-6">
@@ -297,57 +346,6 @@ export default function ContactsPage() {
               </CardContent>
             </Card>
           </div>
-        </div>
-
-        {/* Форма обратной связи */}
-        <div className="mt-16">
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle className="text-center">Остались вопросы? Напишите нам</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="name">Ваше имя</Label>
-                    <Input
-                      id="name"
-                      value={contactForm.name}
-                      onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                      placeholder="Введите ваше имя"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">Номер телефона</Label>
-                    <Input
-                      id="phone"
-                      value={contactForm.phone}
-                      onChange={(e) => setContactForm({ ...contactForm, phone: formatPhoneNumber(e.target.value) })}
-                      placeholder="+375 XX XXX-XX-XX"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="message">Ваше сообщение</Label>
-                  <Textarea
-                    id="message"
-                    value={contactForm.message}
-                    onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                    placeholder="Расскажите, чем мы можем помочь..."
-                    rows={5}
-                    required
-                  />
-                </div>
-
-                <Button type="submit" size="lg" className="w-full">
-                  Отправить сообщение
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
