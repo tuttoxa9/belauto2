@@ -149,7 +149,9 @@ export default function HomePage() {
           className="absolute inset-0 bg-cover bg-center hero-bg"
           style={{
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('${getCachedImageUrl('/mainTouran.PNG')}')`,
-            backgroundPosition: 'center center'
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+            backgroundRepeat: 'no-repeat'
           }}
         />
 
