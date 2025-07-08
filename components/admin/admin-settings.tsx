@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { doc, getDoc, setDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { createCacheInvalidator } from "@/lib/cache-invalidation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,6 +15,7 @@ import { Save, Loader2 } from "lucide-react"
 export default function AdminSettings() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const cacheInvalidator = createCacheInvalidator('settings')
   const [settings, setSettings] = useState({
     main: {
       companyName: "Белавто Центр",
@@ -75,6 +77,7 @@ export default function AdminSettings() {
         setDoc(doc(db, "settings", "homepage"), settings.homepage),
         setDoc(doc(db, "settings", "stories"), settings.stories),
       ])
+      await cacheInvalidator.onUpdate('main')
       alert("Настройки сохранены!")
     } catch (error) {
       console.error("Ошибка сохранения:", error)

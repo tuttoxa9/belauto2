@@ -16,7 +16,11 @@
     "pages:build": "npx @cloudflare/next-on-pages",
     "preview": "npm run pages:build && wrangler pages dev",
     "deploy": "npm run pages:build && wrangler pages deploy",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "worker:dev": "cd cloudflare-worker && wrangler dev",
+    "worker:deploy": "cd cloudflare-worker && wrangler deploy",
+    "worker:tail": "cd cloudflare-worker && wrangler tail",
+    "cache:setup": "echo 'Setting up cache configuration...' && npm run worker:deploy"
   },
   "dependencies": {
     "@cloudflare/next-on-pages": "^1.13.12",

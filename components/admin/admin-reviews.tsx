@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, orderBy, query } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { createCacheInvalidator } from "@/lib/cache-invalidation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,6 +19,7 @@ export default function AdminReviews() {
   const [loading, setLoading] = useState(true)
   const [editingReview, setEditingReview] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const cacheInvalidator = createCacheInvalidator('reviews')
   const [reviewForm, setReviewForm] = useState({
     name: "",
     rating: 5,
@@ -59,8 +61,10 @@ export default function AdminReviews() {
 
       if (editingReview) {
         await updateDoc(doc(db, "reviews", editingReview.id), reviewData)
+        await cacheInvalidator.onUpdate(editingReview.id)
       } else {
-        await addDoc(collection(db, "reviews"), reviewData)
+        const docRef = await addDoc(collection(db, "reviews"), reviewData)
+        await cacheInvalidator.onCreate(docRef.id)
       }
 
       setIsDialogOpen(false)
@@ -89,6 +93,7 @@ export default function AdminReviews() {
     if (confirm("Удалить этот отзыв?")) {
       try {
         await deleteDoc(doc(db, "reviews", reviewId))
+        await cacheInvalidator.onDelete(reviewId)
         loadReviews()
       } catch (error) {
         console.error("Ошибка удаления:", error)

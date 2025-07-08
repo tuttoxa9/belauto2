@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { createCacheInvalidator } from "@/lib/cache-invalidation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,6 +19,7 @@ export default function AdminCars() {
   const [loading, setLoading] = useState(true)
   const [editingCar, setEditingCar] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const cacheInvalidator = createCacheInvalidator('cars')
   const [carForm, setCarForm] = useState({
     make: "",
     model: "",
@@ -79,8 +81,10 @@ export default function AdminCars() {
 
       if (editingCar) {
         await updateDoc(doc(db, "cars", editingCar.id), carData)
+        await cacheInvalidator.onUpdate(editingCar.id)
       } else {
-        await addDoc(collection(db, "cars"), carData)
+        const docRef = await addDoc(collection(db, "cars"), carData)
+        await cacheInvalidator.onCreate(docRef.id)
       }
 
       setIsDialogOpen(false)
@@ -112,6 +116,7 @@ export default function AdminCars() {
     if (confirm("Удалить этот автомобиль?")) {
       try {
         await deleteDoc(doc(db, "cars", carId))
+        await cacheInvalidator.onDelete(carId)
         loadCars()
       } catch (error) {
         console.error("Ошибка удаления:", error)

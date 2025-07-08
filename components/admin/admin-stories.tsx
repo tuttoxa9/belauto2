@@ -11,6 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from "@/components/ui/badge"
 import { Plus, Upload, Trash2, Edit, Eye, Link as LinkIcon, GripVertical } from "lucide-react"
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, setDoc, getDoc } from "firebase/firestore"
+import { createCacheInvalidator } from "@/lib/cache-invalidation"
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"
 import { db, storage } from "@/lib/firebase"
 
@@ -45,6 +46,7 @@ export default function AdminStories() {
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cacheInvalidator = createCacheInvalidator('stories')
 
   const [formData, setFormData] = useState({
     caption: "",
@@ -150,7 +152,7 @@ export default function AdminStories() {
       const mediaType = formData.file.type.startsWith('image/') ? 'image' : 'video'
       const nextOrder = stories && stories.length > 0 ? Math.max(...stories.map(s => s.order)) + 1 : 1
 
-      await addDoc(collection(db, "stories"), {
+      const docRef = await addDoc(collection(db, "stories"), {
         mediaUrl,
         mediaType,
         caption: formData.caption,
@@ -160,6 +162,7 @@ export default function AdminStories() {
         createdAt: new Date(),
       })
 
+      await cacheInvalidator.onCreate(docRef.id)
       setFormData({ caption: "", subtitle: "", linkUrl: "", file: null })
       setIsAddDialogOpen(false)
       loadStories()
@@ -190,6 +193,7 @@ export default function AdminStories() {
       }
 
       await updateDoc(doc(db, "stories", selectedStory.id), updateData)
+      await cacheInvalidator.onUpdate(selectedStory.id)
       setIsEditDialogOpen(false)
       setSelectedStory(null)
       setFormData({ caption: "", subtitle: "", linkUrl: "", file: null })
@@ -204,6 +208,7 @@ export default function AdminStories() {
   const handleDelete = async (story: Story) => {
     try {
       await deleteDoc(doc(db, "stories", story.id))
+      await cacheInvalidator.onDelete(story.id)
       loadStories()
       alert("История удалена!")
     } catch (error) {

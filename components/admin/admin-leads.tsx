@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { collection, getDocs, updateDoc, deleteDoc, doc, orderBy, query } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { createCacheInvalidator } from "@/lib/cache-invalidation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -13,6 +14,7 @@ export default function AdminLeads() {
   const [leads, setLeads] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState("all")
+  const cacheInvalidator = createCacheInvalidator('leads')
 
   useEffect(() => {
     loadLeads()
@@ -38,6 +40,7 @@ export default function AdminLeads() {
   const updateLeadStatus = async (leadId, status) => {
     try {
       await updateDoc(doc(db, "leads", leadId), { status })
+      await cacheInvalidator.onUpdate(leadId)
       loadLeads()
     } catch (error) {
       console.error("Ошибка обновления статуса:", error)
@@ -48,6 +51,7 @@ export default function AdminLeads() {
     if (confirm("Удалить эту заявку?")) {
       try {
         await deleteDoc(doc(db, "leads", leadId))
+        await cacheInvalidator.onDelete(leadId)
         loadLeads()
       } catch (error) {
         console.error("Ошибка удаления:", error)

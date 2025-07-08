@@ -1,98 +1,155 @@
-// Имя вашего проекта в Firebase (из firebaseConfig)
+// Firebase конфигурация
 const FIREBASE_PROJECT_ID = "autobel-a6390";
-
-// Базовый URL для Firebase Storage
+const FIRESTORE_BASE_URL = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/`;
 const STORAGE_BASE_URL = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_PROJECT_ID}.appspot.com/o/`;
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // Добавляем заголовок для отладки
-    console.log('Worker processing:', url.pathname);
-
-    // Получаем путь к файлу из URL (например, /cars/image1.jpg)
-    // url.pathname.substring(1) убирает первый слэш
-    let imagePath = url.pathname.substring(1);
-
-    if (!imagePath) {
-      return new Response('Missing file path', { status: 400 });
-    }
-
-    // Firebase Storage требует, чтобы слэши в пути были закодированы как %2F
-    const encodedImagePath = imagePath.replace(/\//g, '%2F');
-
-    // Собираем полный URL для запроса к Firebase Storage
-    // ?alt=media в конце обязательно, чтобы получить сам файл, а не его метаданные
-    const firebaseStorageUrl = `${STORAGE_BASE_URL}${encodedImagePath}?alt=media`;
-
-    // === КЭШИРОВАНИЕ ===
-    // Создаем ключ для кэша на основе исходного URL запроса
-    const cacheKey = new Request(request.url);
-    const cache = caches.default;
-
-    // Сначала проверяем кэш
-    let response = await cache.match(cacheKey);
-
-    if (!response) {
-      // Если в кэше нет, запрашиваем из Firebase
-      response = await fetch(firebaseStorageUrl, {
-        headers: {
-          'User-Agent': 'Cloudflare-Worker-Image-Cache/1.0'
-        },
-        // Принудительно включаем кэширование для этого запроса
-        cf: {
-          cacheTtl: 2592000, // 30 дней
-          cacheEverything: true
-        }
-      });
-
-      // Если Firebase вернул ошибку, просто передаем ее дальше
-      if (!response.ok) {
-        return response;
-      }
-
-      // Клонируем ответ для кэширования
-      const responseClone = response.clone();
-
-      // Создаем новый ответ с правильными заголовками кэширования
-      const headers = new Headers(response.headers);
-
-      // === САМАЯ ВАЖНАЯ ЧАСТЬ: УПРАВЛЕНИЕ КЭШИРОВАНИЕМ ===
-      // Говорим Cloudflare кэшировать на 30 дней
-      headers.set('Cache-Control', 'public, max-age=2592000, immutable');
-      // Говорим браузеру кэшировать на 1 день
-      headers.set('CDN-Cache-Control', 'public, max-age=86400');
-      // Дополнительно для Cloudflare
-      headers.set('Cloudflare-CDN-Cache-Control', 'public, max-age=2592000');
-      // Помечаем, что кэшировано нашим worker
-      headers.set('X-Cached-By', 'Cloudflare-Worker');
-      headers.set('X-Cache-Status', 'MISS');
-      headers.set('CF-Cache-Status', 'MISS');
-
-      // Создаем финальный ответ
-      response = new Response(responseClone.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: headers
-      });
-
-      // Сохраняем в кэш асинхронно (не блокируем ответ)
-      ctx.waitUntil(cache.put(cacheKey, response.clone()));
+    // Определяем тип запроса: файлы или данные Firestore
+    if (url.pathname.startsWith('/api/firestore/') || url.pathname.startsWith('/firestore/')) {
+      return handleFirestoreRequest(request, env, ctx);
+    } else if (url.pathname.startsWith('/api/images/') || url.pathname.startsWith('/images/')) {
+      return handleImageRequest(request, env, ctx);
     } else {
-      // Если нашли в кэше, добавляем соответствующий заголовок
-      const headers = new Headers(response.headers);
-      headers.set('X-Cache-Status', 'HIT');
-      headers.set('CF-Cache-Status', 'HIT');
-      headers.set('X-Cached-By', 'Cloudflare-Worker');
-
-      response = new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: headers
-      });
+      // Обрабатываем как файл изображения (обратная совместимость)
+      return handleImageRequest(request, env, ctx);
     }
-
-    return response;
   },
 };
+
+// Обработчик Firestore запросов с кэшированием
+async function handleFirestoreRequest(request, env, ctx) {
+  const url = new URL(request.url);
+
+  // Очищаем путь от префиксов
+  let firestorePath = url.pathname.replace(/^\/api\/firestore\//, '').replace(/^\/firestore\//, '');
+
+  if (!firestorePath) {
+    return new Response('Missing Firestore path', { status: 400 });
+  }
+
+  // Создаем URL для Firestore REST API
+  const firestoreUrl = `${FIRESTORE_BASE_URL}${firestorePath}`;
+
+  // Создаем ключ для кэша
+  const cacheKey = new Request(request.url);
+  const cache = caches.default;
+
+  // Проверяем кэш
+  let response = await cache.match(cacheKey);
+
+  if (!response) {
+    // Запрашиваем данные из Firestore
+    response = await fetch(firestoreUrl, {
+      headers: {
+        'Authorization': `Bearer ${env.FIREBASE_API_KEY || ''}`,
+        'Content-Type': 'application/json',
+        'User-Agent': 'Cloudflare-Worker-Firestore-Cache/1.0'
+      }
+    });
+
+    if (!response.ok) {
+      return response;
+    }
+
+    // Добавляем заголовки кэширования
+    const headers = new Headers(response.headers);
+    headers.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=60'); // 5 минут
+    headers.set('CDN-Cache-Control', 'public, max-age=300');
+    headers.set('X-Cached-By', 'Cloudflare-Worker-Firestore');
+    headers.set('X-Cache-Status', 'MISS');
+    headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    response = new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: headers
+    });
+
+    // Сохраняем в кэш
+    ctx.waitUntil(cache.put(cacheKey, response.clone()));
+  } else {
+    // Добавляем заголовок о попадании в кэш
+    const headers = new Headers(response.headers);
+    headers.set('X-Cache-Status', 'HIT');
+
+    response = new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: headers
+    });
+  }
+
+  return response;
+}
+
+// Обработчик изображений (существующая логика)
+async function handleImageRequest(request, env, ctx) {
+  const url = new URL(request.url);
+
+  // Очищаем путь от префиксов
+  let imagePath = url.pathname
+    .replace(/^\/api\/images\//, '')
+    .replace(/^\/images\//, '')
+    .replace(/^\//, '');
+
+  if (!imagePath) {
+    return new Response('Missing file path', { status: 400 });
+  }
+
+  // Firebase Storage требует кодирование слэшей
+  const encodedImagePath = imagePath.replace(/\//g, '%2F');
+  const firebaseStorageUrl = `${STORAGE_BASE_URL}${encodedImagePath}?alt=media`;
+
+  // Кэширование изображений
+  const cacheKey = new Request(request.url);
+  const cache = caches.default;
+
+  let response = await cache.match(cacheKey);
+
+  if (!response) {
+    response = await fetch(firebaseStorageUrl, {
+      headers: {
+        'User-Agent': 'Cloudflare-Worker-Image-Cache/1.0'
+      },
+      cf: {
+        cacheTtl: 2592000, // 30 дней
+        cacheEverything: true
+      }
+    });
+
+    if (!response.ok) {
+      return response;
+    }
+
+    const headers = new Headers(response.headers);
+    headers.set('Cache-Control', 'public, max-age=2592000, immutable');
+    headers.set('CDN-Cache-Control', 'public, max-age=86400');
+    headers.set('Cloudflare-CDN-Cache-Control', 'public, max-age=2592000');
+    headers.set('X-Cached-By', 'Cloudflare-Worker-Images');
+    headers.set('X-Cache-Status', 'MISS');
+
+    response = new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: headers
+    });
+
+    ctx.waitUntil(cache.put(cacheKey, response.clone()));
+  } else {
+    const headers = new Headers(response.headers);
+    headers.set('X-Cache-Status', 'HIT');
+
+    response = new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: headers
+    });
+  }
+
+  return response;
+}
