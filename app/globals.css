@@ -223,8 +223,21 @@
 
   .hero-bg-desktop {
     background-size: cover !important;
-    background-position: center center !important;
+    background-position: center 35% !important;
     background-repeat: no-repeat !important;
+  }
+
+  /* Дополнительные настройки для больших экранов */
+  @media (min-width: 1024px) {
+    .hero-bg-desktop {
+      background-position: center 30% !important;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .hero-bg-desktop {
+      background-position: center 25% !important;
+    }
   }
 
   /* Адаптивные отступы для контента */
