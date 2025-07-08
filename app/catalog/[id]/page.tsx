@@ -120,9 +120,9 @@ export default function CarDetailsPage() {
   const [isBookingOpen, setIsBookingOpen] = useState(false)
   const [isCallbackOpen, setIsCallbackOpen] = useState(false)
   const [isCreditOpen, setIsCreditOpen] = useState(false)
-  const [bookingForm, setBookingForm] = useState({ name: "", phone: "", message: "" })
-  const [callbackForm, setCallbackForm] = useState({ name: "", phone: "" })
-  const [creditForm, setCreditForm] = useState({ name: "", phone: "", message: "" })
+  const [bookingForm, setBookingForm] = useState({ name: "", phone: "+375", message: "" })
+  const [callbackForm, setCallbackForm] = useState({ name: "", phone: "+375" })
+  const [creditForm, setCreditForm] = useState({ name: "", phone: "+375", message: "" })
   const [isCreditFormOpen, setIsCreditFormOpen] = useState(false)
   const [partnerBanks, setPartnerBanks] = useState<PartnerBank[]>([])
   const [loadingBanks, setLoadingBanks] = useState(true)
@@ -352,7 +352,7 @@ export default function CarDetailsPage() {
         console.error('Ошибка отправки в Telegram:', telegramError)
       }
       setIsBookingOpen(false)
-      setBookingForm({ name: "", phone: "", message: "" })
+      setBookingForm({ name: "", phone: "+375", message: "" })
       alert("Заявка на бронирование отправлена! Мы свяжемся с вами в ближайшее время.")
     } catch (error) {
       console.error("Ошибка отправки заявки:", error)
@@ -384,7 +384,7 @@ export default function CarDetailsPage() {
         })
       })
       setIsCallbackOpen(false)
-      setCallbackForm({ name: "", phone: "" })
+      setCallbackForm({ name: "", phone: "+375" })
       alert("Заявка отправлена! Мы свяжемся с вами в ближайшее время.")
     } catch (error) {
       console.error("Ошибка отправки заявки:", error)
@@ -438,7 +438,7 @@ export default function CarDetailsPage() {
       }
 
       setIsCreditFormOpen(false)
-      setCreditForm({ name: "", phone: "", message: "" })
+      setCreditForm({ name: "", phone: "+375", message: "" })
       alert("Заявка на кредит отправлена! Мы свяжемся с вами в ближайшее время.")
     } catch (error) {
       console.error("Ошибка отправки заявки на кредит:", error)
@@ -847,7 +847,7 @@ export default function CarDetailsPage() {
                 </h3>
                 <div className="space-y-3 text-sm">
                   <div>
-                    <div className="font-medium text-slate-900">Автосалон Белавто Центр</div>
+                    <div className="font-medium text-slate-900">автохаус Белавто Центр</div>
                     <div className="text-slate-600">г. Минск, ул. Большое Стиклево 83</div>
                   </div>
                   <div className="flex items-center text-slate-600">

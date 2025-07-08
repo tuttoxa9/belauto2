@@ -19,7 +19,7 @@ export default function ContactsPage() {
   const [loading, setLoading] = useState(true)
   const [contactForm, setContactForm] = useState({
     name: "",
-    phone: "",
+    phone: "+375",
     message: "",
   })
 
@@ -108,7 +108,7 @@ export default function ContactsPage() {
       }
 
       alert("Ваше сообщение отправлено! Мы свяжемся с вами в ближайшее время.")
-      setContactForm({ name: "", phone: "", message: "" })
+      setContactForm({ name: "", phone: "+375", message: "" })
     } catch (error) {
       console.error("Ошибка отправки сообщения:", error)
       alert("Произошла ошибка. Попробуйте еще раз.")

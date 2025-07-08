@@ -36,7 +36,7 @@ export default function HomePage() {
 
   const [contactForm, setContactForm] = useState({
     name: "",
-    phone: "",
+    phone: "+375",
   })
 
   const [cars, setCars] = useState([])
@@ -123,7 +123,7 @@ export default function HomePage() {
         })
       })
 
-      setContactForm({ name: "", phone: "" })
+      setContactForm({ name: "", phone: "+375" })
       alert("Заявка отправлена! Мы свяжемся с вами в ближайшее время.")
     } catch (error) {
       console.error("Ошибка отправки заявки:", error)
@@ -132,12 +132,19 @@ export default function HomePage() {
   }
 
   const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, "")
-    if (numbers.startsWith("375")) {
-      const formatted = numbers.replace(/(\d{3})(\d{2})(\d{3})(\d{2})(\d{2})/, "+$1 $2 $3-$4-$5")
-      return formatted
+    // Удаляем все нецифровые символы кроме +
+    let numbers = value.replace(/[^\d+]/g, "")
+
+    // Если нет + в начале, добавляем +375
+    if (!numbers.startsWith("+375")) {
+      numbers = "+375"
     }
-    return value
+
+    // Берем только +375 и следующие 9 цифр максимум
+    const prefix = "+375"
+    const afterPrefix = numbers.slice(4).replace(/\D/g, "").slice(0, 9)
+
+    return prefix + afterPrefix
   }
 
   return (

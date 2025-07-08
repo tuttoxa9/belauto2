@@ -59,7 +59,7 @@ export default function CreditPage() {
 
   const [creditForm, setCreditForm] = useState({
     name: "",
-    phone: "",
+    phone: "+375",
     email: "",
     carPrice: "",
     downPayment: "",
@@ -261,7 +261,7 @@ export default function CreditPage() {
 
       setCreditForm({
         name: "",
-        phone: "",
+        phone: "+375",
         email: "",
         carPrice: "",
         downPayment: "",

@@ -59,7 +59,7 @@ export default function LeasingPage() {
     // Поля для физ. лица
     fullName: "",
     // Общие поля
-    phone: "",
+    phone: "+375",
     email: "",
     carPrice: "",
     advance: "",
@@ -149,12 +149,19 @@ export default function LeasingPage() {
   }
 
   const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, "")
-    if (numbers.startsWith("375")) {
-      const formatted = numbers.replace(/(\d{3})(\d{2})(\d{3})(\d{2})(\d{2})/, "+$1 $2 $3-$4-$5")
-      return formatted
+    // Удаляем все нецифровые символы кроме +
+    let numbers = value.replace(/[^\d+]/g, "")
+
+    // Если нет + в начале, добавляем +375
+    if (!numbers.startsWith("+375")) {
+      numbers = "+375"
     }
-    return value
+
+    // Берем только +375 и следующие 9 цифр максимум
+    const prefix = "+375"
+    const afterPrefix = numbers.slice(4).replace(/\D/g, "").slice(0, 9)
+
+    return prefix + afterPrefix
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -203,7 +210,7 @@ export default function LeasingPage() {
         contactPerson: "",
         unp: "",
         fullName: "",
-        phone: "",
+        phone: "+375",
         email: "",
         carPrice: "",
         advance: "",
