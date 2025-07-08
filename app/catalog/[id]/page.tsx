@@ -122,6 +122,8 @@ export default function CarDetailsPage() {
   const [isCreditOpen, setIsCreditOpen] = useState(false)
   const [bookingForm, setBookingForm] = useState({ name: "", phone: "", message: "" })
   const [callbackForm, setCallbackForm] = useState({ name: "", phone: "" })
+  const [creditForm, setCreditForm] = useState({ name: "", phone: "", email: "", message: "" })
+  const [isCreditFormOpen, setIsCreditFormOpen] = useState(false)
   const [partnerBanks, setPartnerBanks] = useState<PartnerBank[]>([])
   const [loadingBanks, setLoadingBanks] = useState(true)
   // Состояние кредитного калькулятора
@@ -375,6 +377,61 @@ export default function CarDetailsPage() {
       alert("Заявка отправлена! Мы свяжемся с вами в ближайшее время.")
     } catch (error) {
       console.error("Ошибка отправки заявки:", error)
+      alert("Произошла ошибка. Попробуйте еще раз.")
+    }
+  }
+
+  const handleCreditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      // Сохраняем в Firestore
+      await addDoc(collection(db, "leads"), {
+        ...creditForm,
+        carId: params.id,
+        carInfo: `${car?.make} ${car?.model} ${car?.year}`,
+        type: "credit",
+        status: "new",
+        createdAt: new Date(),
+        creditAmount: getCurrentCreditAmount(),
+        downPayment: getCurrentDownPayment(),
+        loanTerm: loanTerm[0],
+        selectedBank: selectedBank?.name || "",
+        monthlyPayment: calculateMonthlyPayment(),
+        currency: isBelarusianRubles ? "BYN" : "USD"
+      })
+
+      // Отправляем уведомление в Telegram
+      try {
+        await fetch('/api/send-telegram', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: creditForm.name,
+            phone: creditForm.phone,
+            email: creditForm.email,
+            message: creditForm.message,
+            carMake: car?.make,
+            carModel: car?.model,
+            carYear: car?.year,
+            carId: params.id,
+            carPrice: isBelarusianRubles ? getCurrentCreditAmount() + getCurrentDownPayment() : car?.price,
+            downPayment: getCurrentDownPayment(),
+            loanTerm: loanTerm[0],
+            bank: selectedBank?.name || "Не выбран",
+            type: 'credit_request'
+          })
+        })
+      } catch (telegramError) {
+        console.error('Ошибка отправки в Telegram:', telegramError)
+      }
+
+      setIsCreditFormOpen(false)
+      setCreditForm({ name: "", phone: "", email: "", message: "" })
+      alert("Заявка на кредит отправлена! Мы свяжемся с вами в ближайшее время.")
+    } catch (error) {
+      console.error("Ошибка отправки заявки на кредит:", error)
       alert("Произошла ошибка. Попробуйте еще раз.")
     }
   }
@@ -965,7 +1022,10 @@ export default function CarDetailsPage() {
                         <span>Максимальный срок: {selectedBank.maxTerm} мес.</span>
                       </div>
                     </div>
-                    <Button className="w-full mt-6">
+                    <Button
+                      className="w-full mt-6"
+                      onClick={() => setIsCreditFormOpen(true)}
+                    >
                       Подать заявку на кредит
                     </Button>
                   </div>
@@ -1069,6 +1129,93 @@ export default function CarDetailsPage() {
               </div>
               <Button type="submit" className="w-full">
                 Заказать звонок
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Диалог кредитной заявки */}
+        <Dialog open={isCreditFormOpen} onOpenChange={setIsCreditFormOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Подать заявку на кредит</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreditSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="creditName">Ваше имя</Label>
+                <Input
+                  id="creditName"
+                  value={creditForm.name}
+                  onChange={(e) => setCreditForm({ ...creditForm, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="creditPhone">Номер телефона</Label>
+                <Input
+                  id="creditPhone"
+                  value={creditForm.phone}
+                  onChange={(e) => setCreditForm({ ...creditForm, phone: formatPhoneNumber(e.target.value) })}
+                  placeholder="+375 XX XXX-XX-XX"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="creditEmail">Email</Label>
+                <Input
+                  id="creditEmail"
+                  type="email"
+                  value={creditForm.email}
+                  onChange={(e) => setCreditForm({ ...creditForm, email: e.target.value })}
+                  placeholder="example@mail.com"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="creditMessage">Комментарий (необязательно)</Label>
+                <Textarea
+                  id="creditMessage"
+                  value={creditForm.message}
+                  onChange={(e) => setCreditForm({ ...creditForm, message: e.target.value })}
+                  placeholder="Дополнительная информация..."
+                />
+              </div>
+
+              {/* Показываем данные о выбранном кредите */}
+              {selectedBank && (
+                <div className="bg-slate-50 p-4 rounded-lg space-y-2">
+                  <h4 className="font-semibold text-slate-900">Параметры кредита:</h4>
+                  <div className="text-sm space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Автомобиль:</span>
+                      <span className="font-medium">{car?.make} {car?.model} {car?.year}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Сумма кредита:</span>
+                      <span className="font-medium">{formatPrice(getCurrentCreditAmount())}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Первоначальный взнос:</span>
+                      <span className="font-medium">{formatPrice(getCurrentDownPayment())}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Срок:</span>
+                      <span className="font-medium">{loanTerm[0]} мес.</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Банк:</span>
+                      <span className="font-medium">{selectedBank.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Ежемесячный платеж:</span>
+                      <span className="font-medium text-blue-600">{formatPrice(calculateMonthlyPayment())}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <Button type="submit" className="w-full">
+                Отправить заявку
               </Button>
             </form>
           </DialogContent>
