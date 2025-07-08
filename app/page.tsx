@@ -179,7 +179,7 @@ export default function HomePage() {
           <h1 className="text-hero text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 sm:mb-6 leading-tight">
             Найди свой <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">идеальный автомобиль</span> надежным способом
           </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-8 sm:mb-10 md:mb-8 lg:mb-12 text-gray-100 font-medium leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-8 sm:mb-10 md:mb-16 lg:mb-20 xl:mb-24 text-gray-100 font-medium leading-relaxed">
             {settings.heroSubtitle}
           </p>
 
