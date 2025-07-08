@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { doc, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { Card, CardContent } from "@/components/ui/card"
-import { Loader2, Shield, Eye, UserCheck, Lock, FileText, Calendar } from "lucide-react"
+import { Shield, Eye, UserCheck, Lock, FileText, Calendar } from "lucide-react"
 
 interface PrivacyData {
   title: string
@@ -130,8 +130,31 @@ Email: privacy@avtobusiness.by
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="min-h-screen bg-gray-50">
+        <div className="container px-4 py-8">
+          {/* Header skeleton */}
+          <div className="text-center mb-12">
+            <div className="w-80 h-10 bg-gray-200 rounded animate-pulse mx-auto mb-4"></div>
+            <div className="w-96 h-6 bg-gray-200 rounded animate-pulse mx-auto"></div>
+          </div>
+
+          {/* Content skeleton */}
+          <div className="max-w-4xl mx-auto space-y-8">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="bg-white rounded-lg shadow-sm border p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-8 h-8 bg-blue-200 rounded animate-pulse"></div>
+                  <div className="w-48 h-6 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                <div className="space-y-3">
+                  <div className="w-full h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-full h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-3/4 h-4 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     )
   }

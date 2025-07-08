@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Save, Loader2, Plus, Trash2, Shield, Award, Users, Car, Phone, MapPin, Clock, CheckCircle, Star, Wrench, CreditCard, DollarSign, FileText, Building, TrendingUp, Calculator, Handshake } from "lucide-react"
+import { Save, Plus, Trash2, Shield, Award, Users, Car, Phone, MapPin, Clock, CheckCircle, Star, Wrench, CreditCard, DollarSign, FileText, Building, TrendingUp, Calculator, Handshake } from "lucide-react"
 
 export default function AdminAbout() {
   const [loading, setLoading] = useState(true)
@@ -217,8 +217,21 @@ export default function AdminAbout() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="w-48 h-8 bg-gray-700 rounded animate-pulse"></div>
+          <div className="w-24 h-10 bg-purple-700 rounded animate-pulse"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="w-full h-64 bg-gray-700 rounded animate-pulse"></div>
+            <div className="w-full h-32 bg-gray-700 rounded animate-pulse"></div>
+          </div>
+          <div className="space-y-4">
+            <div className="w-full h-48 bg-gray-700 rounded animate-pulse"></div>
+            <div className="w-full h-48 bg-gray-700 rounded animate-pulse"></div>
+          </div>
+        </div>
       </div>
     )
   }

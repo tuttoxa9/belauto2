@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calculator, CreditCard, CheckCircle, Building, Percent, Clock, Loader2, DollarSign, FileText, Users, Zap, Award, Target, Briefcase, TrendingUp, Handshake, CheckSquare, Coins, Timer, Heart, Shield, TrendingDown } from "lucide-react"
+import { Calculator, CreditCard, CheckCircle, Building, Percent, Clock, DollarSign, FileText, Users, Zap, Award, Target, Briefcase, TrendingUp, Handshake, CheckSquare, Coins, Timer, Heart, Shield, TrendingDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useUsdBynRate } from "@/components/providers/usd-byn-rate-provider"
 import { convertUsdToByn } from "@/lib/utils"
@@ -329,11 +329,86 @@ export default function CreditPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Загружаем информацию о кредитах</h2>
-          <p className="text-gray-600">Подготавливаем для вас самые выгодные предложения...</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="container px-4 py-8">
+          {/* Breadcrumb skeleton */}
+          <div className="mb-6">
+            <div className="flex items-center space-x-2">
+              <div className="w-16 h-4 bg-gray-200 rounded animate-pulse"></div>
+              <div className="w-1 h-4 bg-gray-200 rounded animate-pulse"></div>
+              <div className="w-12 h-4 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Header skeleton */}
+          <div className="text-center mb-12">
+            <div className="w-96 h-10 bg-gray-200 rounded animate-pulse mx-auto mb-4"></div>
+            <div className="w-80 h-6 bg-gray-200 rounded animate-pulse mx-auto mb-6"></div>
+            <div className="w-full max-w-3xl h-16 bg-gray-200 rounded animate-pulse mx-auto"></div>
+          </div>
+
+          {/* Two column layout skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Calculator skeleton */}
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <div className="w-48 h-6 bg-gray-200 rounded animate-pulse mb-6"></div>
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="w-24 h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
+                    <div className="w-full h-3 bg-gray-200 rounded animate-pulse mb-2"></div>
+                    <div className="w-full h-8 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                  <div>
+                    <div className="w-20 h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
+                    <div className="w-full h-3 bg-gray-200 rounded animate-pulse mb-2"></div>
+                    <div className="w-full h-8 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="w-full h-32 bg-blue-50 rounded animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Form skeleton */}
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <div className="w-40 h-6 bg-gray-200 rounded animate-pulse mb-6"></div>
+              <div className="space-y-4">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="w-full h-10 bg-gray-200 rounded animate-pulse"></div>
+                ))}
+                <div className="w-full h-12 bg-blue-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Partners and benefits skeleton */}
+          <div className="py-16">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <div>
+                <div className="w-64 h-8 bg-gray-200 rounded animate-pulse mb-8"></div>
+                <div className="grid grid-cols-2 gap-4">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div key={index} className="w-full h-24 bg-white rounded border animate-pulse"></div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="w-56 h-8 bg-gray-200 rounded animate-pulse mb-8"></div>
+                <div className="space-y-6">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div key={index} className="flex items-start space-x-4">
+                      <div className="w-12 h-12 bg-green-200 rounded-lg animate-pulse"></div>
+                      <div className="flex-1">
+                        <div className="w-48 h-5 bg-gray-200 rounded animate-pulse mb-2"></div>
+                        <div className="w-full h-4 bg-gray-200 rounded animate-pulse mb-1"></div>
+                        <div className="w-3/4 h-4 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )

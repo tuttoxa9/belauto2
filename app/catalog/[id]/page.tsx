@@ -903,8 +903,8 @@ export default function CarDetailsPage() {
                     </Select>
                   ) : loadingBanks ? (
                     <div className="text-center py-2">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-slate-900 mx-auto"></div>
-                      <p className="text-sm text-slate-600 mt-2">Загрузка банков...</p>
+                      <div className="w-full h-8 bg-slate-200 rounded animate-pulse mb-2"></div>
+                      <div className="w-3/4 h-4 bg-slate-200 rounded animate-pulse mx-auto"></div>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-2 text-amber-600 bg-amber-50 p-3 rounded-lg">
@@ -972,10 +972,11 @@ export default function CarDetailsPage() {
                 ) : (
                   <div className="flex flex-col items-center justify-center h-64 text-center">
                     {loadingBanks ? (
-                      <>
-                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-slate-900 mb-4"></div>
-                        <p className="text-slate-600">Загрузка банков-партнеров...</p>
-                      </>
+                      <div className="w-full space-y-4">
+                        <div className="w-full h-12 bg-slate-200 rounded animate-pulse"></div>
+                        <div className="w-3/4 h-4 bg-slate-200 rounded animate-pulse mx-auto"></div>
+                        <div className="w-1/2 h-4 bg-slate-200 rounded animate-pulse mx-auto"></div>
+                      </div>
                     ) : partnerBanks.length === 0 ? (
                       <>
                         <AlertCircle className="h-10 w-10 text-amber-500 mb-4" />
