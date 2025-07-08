@@ -223,20 +223,48 @@
 
   .hero-bg-desktop {
     background-size: cover !important;
-    background-position: center 60% !important;
+    background-position: center 45% !important;
     background-repeat: no-repeat !important;
   }
 
   /* Дополнительные настройки для больших экранов */
   @media (min-width: 1024px) {
     .hero-bg-desktop {
-      background-position: center 65% !important;
+      background-position: center 40% !important;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .hero-bg-desktop {
+      background-position: center 35% !important;
     }
   }
 
   @media (min-width: 1440px) {
     .hero-bg-desktop {
-      background-position: center 70% !important;
+      background-position: center 30% !important;
+    }
+  }
+
+  /* Адаптивные настройки для средних экранов (ноутбуки) */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .hero-content {
+      padding-bottom: 6rem !important;
+    }
+
+    .hero-bg-desktop {
+      background-position: center 50% !important;
+    }
+  }
+
+  /* Адаптивные настройки для больших ноутбуков */
+  @media (min-width: 1024px) and (max-width: 1440px) {
+    .hero-content {
+      padding-bottom: 8rem !important;
+    }
+
+    .hero-bg-desktop {
+      background-position: center 45% !important;
     }
   }
 

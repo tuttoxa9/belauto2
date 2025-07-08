@@ -143,7 +143,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-100 homepage -mt-14">
       {/* Главный баннер */}
-      <section className="relative min-h-[85vh] sm:min-h-[80vh] md:h-[75vh] flex items-center justify-center pt-14">
+      <section className="relative min-h-[85vh] sm:min-h-[80vh] md:min-h-[75vh] lg:min-h-[80vh] xl:min-h-[85vh] flex items-center justify-center pt-14">
 
         {/* Фоновое изображение для ПК */}
         <div
@@ -151,7 +151,7 @@ export default function HomePage() {
           style={{
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('${getCachedImageUrl('/mainTouran.PNG')}')`,
             backgroundSize: 'cover',
-            backgroundPosition: 'center center',
+            backgroundPosition: 'center 45%',
             backgroundRepeat: 'no-repeat'
           }}
         />
@@ -171,11 +171,11 @@ export default function HomePage() {
           }}
         />
 
-        <div className="relative z-30 text-center text-white max-w-4xl mx-auto px-4 pb-32 sm:pb-24 md:pb-16 hero-content">
-          <h1 className="text-hero text-2xl sm:text-3xl md:text-6xl mb-4 sm:mb-6 leading-tight">
+        <div className="relative z-30 text-center text-white max-w-4xl mx-auto px-4 pb-40 sm:pb-32 md:pb-24 lg:pb-32 xl:pb-20 hero-content">
+          <h1 className="text-hero text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 sm:mb-6 leading-tight">
             Найди свой <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">идеальный автомобиль</span> надежным способом
           </h1>
-          <p className="text-base sm:text-lg md:text-2xl mb-8 sm:mb-8 text-gray-100 font-medium leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-8 sm:mb-10 md:mb-8 lg:mb-12 text-gray-100 font-medium leading-relaxed">
             {settings.heroSubtitle}
           </p>
 
