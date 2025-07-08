@@ -217,33 +217,33 @@
   /* Стили для фонового изображения на мобильных устройствах */
   .hero-bg-mobile {
     background-size: cover !important;
-    background-position: center 35% !important;
+    background-position: center 60% !important;
     background-repeat: no-repeat !important;
   }
 
   .hero-bg-desktop {
     background-size: cover !important;
-    background-position: center 35% !important;
+    background-position: center 60% !important;
     background-repeat: no-repeat !important;
   }
 
   /* Дополнительные настройки для больших экранов */
   @media (min-width: 1024px) {
     .hero-bg-desktop {
-      background-position: center 30% !important;
+      background-position: center 65% !important;
     }
   }
 
   @media (min-width: 1440px) {
     .hero-bg-desktop {
-      background-position: center 25% !important;
+      background-position: center 70% !important;
     }
   }
 
   /* Адаптивные настройки для мобильных */
   @media (max-width: 768px) {
     .hero-bg-mobile {
-      background-position: center 30% !important;
+      background-position: center 65% !important;
     }
 
     .hero-content {
@@ -253,7 +253,7 @@
 
   @media (max-width: 480px) {
     .hero-bg-mobile {
-      background-position: center 25% !important;
+      background-position: center 70% !important;
     }
 
     .hero-content {
@@ -263,7 +263,7 @@
 
   @media (max-width: 375px) {
     .hero-bg-mobile {
-      background-position: center 20% !important;
+      background-position: center 75% !important;
     }
 
     .hero-content {
