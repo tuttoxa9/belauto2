@@ -151,7 +151,7 @@ export default function HomePage() {
           style={{
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('${getCachedImageUrl('/mainTouran.PNG')}')`,
             backgroundSize: 'cover',
-            backgroundPosition: 'center 25%',
+            backgroundPosition: 'center 80%',
             backgroundRepeat: 'no-repeat'
           }}
         />
