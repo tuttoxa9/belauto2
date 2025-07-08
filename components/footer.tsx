@@ -48,7 +48,7 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white mb-16 md:mb-0 rounded-t-[50px] mt-8 footer-corner-fill">
       <div className="container px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Колонка 1: Логотип и слоган */}
           <div className="space-y-4">
             <Link href="/" className="flex justify-center md:justify-start">
@@ -174,21 +174,33 @@ export default function Footer() {
                     <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 8.16l-1.584 7.44c-.12.528-.432.66-.876.412l-2.424-1.788-1.164 1.12c-.132.132-.24.24-.492.24l.168-2.388 4.416-3.984c.192-.168-.036-.264-.3-.096l-5.46 3.432-2.352-.744c-.516-.156-.528-.516.108-.768l9.192-3.54c.432-.156.804.108.672.672z"/>
                   </svg>
                 </a>
-                <a href={settings?.socialMedia?.avby || "#"} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-3 bg-white rounded-lg">
-                  <Image
-                    src="/av.png"
-                    alt="av.by"
-                    width={28}
-                    height={22}
-                    className="object-contain"
-                  />
-                </a>
                 <a href={settings?.socialMedia?.tiktok || "#"} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                   <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.10-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
                   </svg>
                 </a>
               </div>
+            )}
+          </div>
+
+          {/* Колонка 5: av.by */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg">Наша страница на av.by</h3>
+            {loading ? (
+              <div className="flex items-center">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <span className="text-gray-400 text-sm">Загрузка...</span>
+              </div>
+            ) : (
+              <a href={settings?.socialMedia?.avby || "#"} target="_blank" rel="noopener noreferrer" className="inline-block">
+                <Image
+                  src="/av.png"
+                  alt="av.by"
+                  width={120}
+                  height={90}
+                  className="object-contain hover:opacity-80 transition-opacity"
+                />
+              </a>
             )}
           </div>
         </div>
