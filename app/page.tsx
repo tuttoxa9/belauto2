@@ -147,6 +147,10 @@ export default function HomePage() {
     return prefix + afterPrefix
   }
 
+  const isPhoneValid = (phone: string) => {
+    return phone.length === 13 && phone.startsWith("+375")
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 homepage -mt-14">
       {/* Главный баннер */}

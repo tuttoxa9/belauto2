@@ -164,6 +164,10 @@ export default function LeasingPage() {
     return prefix + afterPrefix
   }
 
+  const isPhoneValid = (phone: string) => {
+    return phone.length === 13 && phone.startsWith("+375")
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
