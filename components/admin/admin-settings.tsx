@@ -20,7 +20,7 @@ export default function AdminSettings() {
       phone: "+375 29 123-45-67",
       email: "info@belavto.by",
       address: "г. Минск, ул. Примерная, 123",
-      workingHours: "Пн-Пт: 9:00-21:00, Сб-Вс: 10:00-19:00",
+      workingHours: "Пн-Пт: 9:00-21:00, Сб-Вс: 10:00-20:00",
       socialMedia: {
         instagram: "#",
         telegram: "#",

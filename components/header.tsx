@@ -253,7 +253,7 @@ export default function Header() {
                 </div>
                 <div className="text-xs text-gray-900 font-semibold">
                   <div>Пн-Пт: 9:00-21:00</div>
-                  <div>Сб-Вс: 10:00-19:00</div>
+                  <div>Сб-Вс: 10:00-20:00</div>
                 </div>
               </div>
             ) : (
@@ -270,7 +270,7 @@ export default function Header() {
                 </a>
                 <div className="text-xs text-gray-900 font-semibold">
                   <div>Пн-Пт: 9:00-21:00</div>
-                  <div>Сб-Вс: 10:00-19:00</div>
+                  <div>Сб-Вс: 10:00-20:00</div>
                 </div>
               </>
             )}

@@ -34,7 +34,7 @@ export default function ContactsPage() {
     emailNote: "Отвечаем в течение часа",
     workingHours: {
       weekdays: "Понедельник - Пятница: 9:00 - 21:00",
-      weekends: "Суббота - Воскресенье: 10:00 - 19:00",
+      weekends: "Суббота - Воскресенье: 10:00 - 20:00",
     },
     socialMedia: {
       instagram: {

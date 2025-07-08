@@ -787,7 +787,7 @@ export default function CarDetailsPage() {
                     <Clock className="h-4 w-4 mr-2" />
                     <div>
                       <div>Пн-Пт: 9:00-21:00</div>
-                      <div>Сб-Вс: 10:00-19:00</div>
+                      <div>Сб-Вс: 10:00-20:00</div>
                     </div>
                   </div>
                   <div className="flex items-center text-slate-600">
