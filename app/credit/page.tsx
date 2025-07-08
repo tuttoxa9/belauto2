@@ -124,12 +124,12 @@ export default function CreditPage() {
   }
 
   const formatCurrency = (amount: number) => {
-    if (isBelarusianRubles && usdBynRate) {
+    if (isBelarusianRubles) {
       return new Intl.NumberFormat("ru-BY", {
         style: "currency",
         currency: "BYN",
         minimumFractionDigits: 0,
-      }).format(amount * usdBynRate)
+      }).format(amount)
     }
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -152,30 +152,36 @@ export default function CreditPage() {
     if (!usdBynRate) return
 
     if (checked) {
-      // Переключение на BYN
+      // Переключение на BYN - устанавливаем минимальные значения для BYN
+      const newCarPrice = Math.max(3000, Math.round(calculator.carPrice[0] * usdBynRate))
+      const newDownPayment = Math.max(300, Math.round(calculator.downPayment[0] * usdBynRate))
+
       setCalculator({
         ...calculator,
-        carPrice: [Math.round(calculator.carPrice[0] * usdBynRate)],
-        downPayment: [Math.round(calculator.downPayment[0] * usdBynRate)]
+        carPrice: [newCarPrice],
+        downPayment: [newDownPayment]
       })
       // Обновляем ручные поля
       setManualInputs({
         ...manualInputs,
-        carPrice: Math.round(calculator.carPrice[0] * usdBynRate).toString(),
-        downPayment: Math.round(calculator.downPayment[0] * usdBynRate).toString()
+        carPrice: newCarPrice.toString(),
+        downPayment: newDownPayment.toString()
       })
     } else {
       // Переключение на USD
+      const newCarPrice = Math.max(1000, Math.round(calculator.carPrice[0] / usdBynRate))
+      const newDownPayment = Math.max(100, Math.round(calculator.downPayment[0] / usdBynRate))
+
       setCalculator({
         ...calculator,
-        carPrice: [Math.round(calculator.carPrice[0] / usdBynRate)],
-        downPayment: [Math.round(calculator.downPayment[0] / usdBynRate)]
+        carPrice: [newCarPrice],
+        downPayment: [newDownPayment]
       })
       // Обновляем ручные поля
       setManualInputs({
         ...manualInputs,
-        carPrice: Math.round(calculator.carPrice[0] / usdBynRate).toString(),
-        downPayment: Math.round(calculator.downPayment[0] / usdBynRate).toString()
+        carPrice: newCarPrice.toString(),
+        downPayment: newDownPayment.toString()
       })
     }
   }
@@ -187,16 +193,22 @@ export default function CreditPage() {
 
     switch (field) {
       case 'carPrice':
-        setCalculator({ ...calculator, carPrice: [numValue] })
+        const clampedCarPrice = Math.max(getCreditMinValue(), Math.min(getCreditMaxValue(), numValue))
+        setCalculator({ ...calculator, carPrice: [clampedCarPrice] })
         break
       case 'downPayment':
-        setCalculator({ ...calculator, downPayment: [numValue] })
+        const minDown = calculator.carPrice[0] * 0.1
+        const maxDown = calculator.carPrice[0] * 0.8
+        const clampedDownPayment = Math.max(minDown, Math.min(maxDown, numValue))
+        setCalculator({ ...calculator, downPayment: [clampedDownPayment] })
         break
       case 'loanTerm':
-        setCalculator({ ...calculator, loanTerm: [numValue] })
+        const clampedTerm = Math.max(12, Math.min(84, numValue))
+        setCalculator({ ...calculator, loanTerm: [clampedTerm] })
         break
       case 'interestRate':
-        setCalculator({ ...calculator, interestRate: [numValue] })
+        const clampedRate = Math.max(10, Math.min(25, numValue))
+        setCalculator({ ...calculator, interestRate: [clampedRate] })
         break
     }
   }
