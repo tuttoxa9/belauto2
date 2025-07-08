@@ -889,7 +889,7 @@ export default function CreditPage() {
                       <div className="flex items-center space-x-3">
                         <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-blue-100 group-hover:to-blue-200 transition-colors">
                           <img
-                            src={partner.logoUrl || "/placeholder.svg"}
+                            src={partner.logoUrl ? getCachedImageUrl(partner.logoUrl) : "/placeholder.svg"}
                             alt={partner.name}
                             className="h-8 w-10 object-contain"
                           />

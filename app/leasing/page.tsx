@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calculator, Car, CheckCircle, Building, TrendingDown, Shield, DollarSign, Clock, FileText, Users, Zap, Award, Target, Briefcase, TrendingUp, Handshake, CheckSquare, Coins, Timer, Heart, Calendar } from "lucide-react"
 import { doc, getDoc, addDoc, collection, setDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { getCachedImageUrl } from "@/lib/image-cache"
 import LeasingConditions from "@/components/leasing-conditions"
 import LeasingCalculator from "@/components/leasing-calculator"
 
@@ -613,7 +614,7 @@ export default function LeasingPage() {
                       <div className="flex items-center space-x-3">
                         <div className="w-12 h-12 bg-gradient-to-br from-green-50 to-green-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-green-100 group-hover:to-green-200 transition-colors">
                           <img
-                            src={company.logoUrl || "/placeholder.svg"}
+                            src={company.logoUrl ? getCachedImageUrl(company.logoUrl) : "/placeholder.svg"}
                             alt={company.name}
                             className="h-8 w-10 object-contain"
                           />
