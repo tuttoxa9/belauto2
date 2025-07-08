@@ -219,7 +219,16 @@ export default function Header() {
                   {settings?.phone || "+375 XX XXX-XX-XX"}
                 </a>
               )}
-              <div className="mb-6 space-y-3">
+              <Button
+                className="w-full bg-blue-600 hover:bg-blue-700 font-display font-semibold tracking-wide mb-6"
+                onClick={() => {
+                  setIsMobileMenuOpen(false)
+                  setIsCallbackOpen(true)
+                }}
+              >
+                Связаться
+              </Button>
+              <div className="space-y-3 pt-4 border-t border-gray-200">
                 <div>
                   <div className="text-sm font-semibold text-gray-900 mb-1">Адрес:</div>
                   <div className="text-sm text-gray-600">{settings?.address || "г. Минск, ул. Примерная, 123"}</div>
@@ -230,15 +239,6 @@ export default function Header() {
                   <div className="text-sm text-gray-600">Сб-Вс: 10:00-20:00</div>
                 </div>
               </div>
-              <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 font-display font-semibold tracking-wide"
-                onClick={() => {
-                  setIsMobileMenuOpen(false)
-                  setIsCallbackOpen(true)
-                }}
-              >
-                Связаться
-              </Button>
             </div>
           </SheetContent>
         </Sheet>
