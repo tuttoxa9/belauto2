@@ -11,6 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calculator, CreditCard, CheckCircle, Building, Percent, Clock, Loader2, DollarSign, FileText, Users, Zap, Award, Target, Briefcase, TrendingUp, Handshake, CheckSquare, Coins, Timer, Heart, Shield, TrendingDown } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { useUsdBynRate } from "@/components/providers/usd-byn-rate-provider"
+import { convertUsdToByn } from "@/lib/utils"
 import { doc, getDoc, addDoc, collection } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import CreditConditions from "@/components/credit-conditions"
@@ -36,6 +39,8 @@ interface CreditPageSettings {
 export default function CreditPage() {
   const [settings, setSettings] = useState<CreditPageSettings | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isBelarusianRubles, setIsBelarusianRubles] = useState(false)
+  const usdBynRate = useUsdBynRate()
 
   const [calculator, setCalculator] = useState({
     carPrice: [50000],
@@ -100,11 +105,48 @@ export default function CreditPage() {
   }
 
   const formatCurrency = (amount: number) => {
+    if (isBelarusianRubles && usdBynRate) {
+      return new Intl.NumberFormat("ru-BY", {
+        style: "currency",
+        currency: "BYN",
+        minimumFractionDigits: 0,
+      }).format(amount * usdBynRate)
+    }
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 0,
     }).format(amount)
+  }
+
+  const getCreditMinValue = () => {
+    return isBelarusianRubles ? 3000 : 1000
+  }
+
+  const getCreditMaxValue = () => {
+    return isBelarusianRubles ? 600000 : 200000
+  }
+
+  const handleCurrencyChange = (checked: boolean) => {
+    setIsBelarusianRubles(checked)
+
+    if (!usdBynRate) return
+
+    if (checked) {
+      // Переключение на BYN
+      setCalculator({
+        ...calculator,
+        carPrice: [Math.round(calculator.carPrice[0] * usdBynRate)],
+        downPayment: [Math.round(calculator.downPayment[0] * usdBynRate)]
+      })
+    } else {
+      // Переключение на USD
+      setCalculator({
+        ...calculator,
+        carPrice: [Math.round(calculator.carPrice[0] / usdBynRate)],
+        downPayment: [Math.round(calculator.downPayment[0] / usdBynRate)]
+      })
+    }
   }
 
   const formatPhoneNumber = (value: string) => {
@@ -263,14 +305,26 @@ export default function CreditPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Переключатель валюты */}
+                <div className="flex items-center space-x-2 p-3 bg-slate-50 rounded-lg">
+                  <Checkbox
+                    id="currency-switch"
+                    checked={isBelarusianRubles}
+                    onCheckedChange={handleCurrencyChange}
+                  />
+                  <Label htmlFor="currency-switch" className="text-sm font-medium">
+                    В белорусских рублях
+                  </Label>
+                </div>
+
                 <div>
                   <Label>Стоимость автомобиля: {formatCurrency(calculator.carPrice[0])}</Label>
                   <Slider
                     value={calculator.carPrice}
                     onValueChange={(value) => setCalculator({ ...calculator, carPrice: value })}
-                    max={200000}
-                    min={10000}
-                    step={5000}
+                    max={getCreditMaxValue()}
+                    min={getCreditMinValue()}
+                    step={isBelarusianRubles ? 1000 : 5000}
                     className="mt-2"
                   />
                 </div>
@@ -282,7 +336,7 @@ export default function CreditPage() {
                     onValueChange={(value) => setCalculator({ ...calculator, downPayment: value })}
                     max={calculator.carPrice[0] * 0.8}
                     min={calculator.carPrice[0] * 0.1}
-                    step={1000}
+                    step={isBelarusianRubles ? 500 : 1000}
                     className="mt-2"
                   />
                 </div>
@@ -330,6 +384,13 @@ export default function CreditPage() {
                     <span>Переплата:</span>
                     <span className="font-semibold text-red-600">{formatCurrency(overpayment)}</span>
                   </div>
+                  {!isBelarusianRubles && usdBynRate && (
+                    <div className="pt-2 mt-2 border-t border-blue-200">
+                      <div className="text-sm text-blue-700">
+                        Ежемесячный платеж: ≈ {convertUsdToByn(monthlyPayment, usdBynRate)} BYN
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -442,17 +503,20 @@ export default function CreditPage() {
                               key={partner.name}
                               value={partner.name.toLowerCase().replace(/[\s-]/g, '')}
                             >
-                              <div className="flex items-center gap-2 w-full">
-                                {partner.logoUrl && (
-                                  <Image
-                                    src={getCachedImageUrl(partner.logoUrl)}
-                                    alt={`${partner.name} логотип`}
-                                    width={20}
-                                    height={20}
-                                    className="object-contain rounded"
-                                  />
-                                )}
-                                <span>{partner.name}</span>
+                              <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-2">
+                                  {partner.logoUrl && (
+                                    <Image
+                                      src={getCachedImageUrl(partner.logoUrl)}
+                                      alt={`${partner.name} логотип`}
+                                      width={20}
+                                      height={20}
+                                      className="object-contain rounded"
+                                    />
+                                  )}
+                                  <span>{partner.name}</span>
+                                </div>
+                                <span className="text-sm font-semibold text-slate-600">{partner.minRate}%</span>
                               </div>
                             </SelectItem>
                           ))}

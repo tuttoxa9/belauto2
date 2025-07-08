@@ -40,6 +40,7 @@ import {
   Clock,
   AlertCircle
 } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
 import CarDetailsSkeleton from "@/components/car-details-skeleton"
 
 // Компонент ошибки для несуществующего автомобиля
@@ -128,6 +129,8 @@ export default function CarDetailsPage() {
   const [downPayment, setDownPayment] = useState([20000])
   const [loanTerm, setLoanTerm] = useState([60])
   const [selectedBank, setSelectedBank] = useState<PartnerBank | null>(null)
+  // Состояние для валюты
+  const [isBelarusianRubles, setIsBelarusianRubles] = useState(false)
   // Touch events для свайпов на мобильных устройствах
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
@@ -218,11 +221,60 @@ export default function CarDetailsPage() {
   }
 
   const formatPrice = (price: number) => {
+    if (isBelarusianRubles && usdBynRate) {
+      return new Intl.NumberFormat("ru-BY", {
+        style: "currency",
+        currency: "BYN",
+        minimumFractionDigits: 0,
+      }).format(price * usdBynRate)
+    }
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 0,
     }).format(price)
+  }
+
+  const getCreditMinValue = () => {
+    return isBelarusianRubles ? 3000 : 1000
+  }
+
+  const getCreditMaxValue = () => {
+    if (isBelarusianRubles && usdBynRate) {
+      return car ? car.price * usdBynRate : 200000
+    }
+    return car ? car.price : 200000
+  }
+
+  const getCurrentCreditAmount = () => {
+    if (isBelarusianRubles && usdBynRate) {
+      return creditAmount[0] * usdBynRate
+    }
+    return creditAmount[0]
+  }
+
+  const getCurrentDownPayment = () => {
+    if (isBelarusianRubles && usdBynRate) {
+      return downPayment[0] * usdBynRate
+    }
+    return downPayment[0]
+  }
+
+  // При переключении валюты пересчитываем значения
+  const handleCurrencyChange = (checked: boolean) => {
+    setIsBelarusianRubles(checked)
+
+    if (!car || !usdBynRate) return
+
+    if (checked) {
+      // Переключение на BYN
+      setCreditAmount([Math.round(car.price * 0.8 * usdBynRate)])
+      setDownPayment([Math.round(car.price * 0.2 * usdBynRate)])
+    } else {
+      // Переключение на USD
+      setCreditAmount([car.price * 0.8])
+      setDownPayment([car.price * 0.2])
+    }
   }
 
   const formatMileage = (mileage: number) => {
@@ -246,7 +298,7 @@ export default function CarDetailsPage() {
   // Расчет ежемесячного платежа
   const calculateMonthlyPayment = () => {
     if (!selectedBank) return 0
-    const principal = creditAmount[0]
+    const principal = getCurrentCreditAmount()
     const rate = selectedBank.rate / 100 / 12
     const term = loanTerm[0]
     if (rate === 0) return principal / term
@@ -757,24 +809,36 @@ export default function CarDetailsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Калькулятор */}
               <div className="space-y-6">
+                {/* Переключатель валюты */}
+                <div className="flex items-center space-x-2 p-3 bg-slate-50 rounded-lg">
+                  <Checkbox
+                    id="currency-switch"
+                    checked={isBelarusianRubles}
+                    onCheckedChange={handleCurrencyChange}
+                  />
+                  <Label htmlFor="currency-switch" className="text-sm font-medium">
+                    В белорусских рублях
+                  </Label>
+                </div>
+
                 <div className="space-y-3">
-                  <Label>Сумма кредита: {formatPrice(creditAmount[0])}</Label>
+                  <Label>Сумма кредита: {formatPrice(getCurrentCreditAmount())}</Label>
                   <Slider
                     value={creditAmount}
                     onValueChange={setCreditAmount}
-                    min={10000}
-                    max={car.price}
-                    step={1000}
+                    min={getCreditMinValue()}
+                    max={getCreditMaxValue()}
+                    step={isBelarusianRubles ? 100 : 1000}
                   />
                 </div>
                 <div className="space-y-3">
-                  <Label>Первоначальный взнос: {formatPrice(downPayment[0])}</Label>
+                  <Label>Первоначальный взнос: {formatPrice(getCurrentDownPayment())}</Label>
                   <Slider
                     value={downPayment}
                     onValueChange={setDownPayment}
-                    min={car.price * 0.1}
-                    max={car.price * 0.5}
-                    step={1000}
+                    min={isBelarusianRubles && usdBynRate ? car.price * 0.1 * usdBynRate : car.price * 0.1}
+                    max={isBelarusianRubles && usdBynRate ? car.price * 0.5 * usdBynRate : car.price * 0.5}
+                    step={isBelarusianRubles ? 100 : 1000}
                   />
                 </div>
                 <div className="space-y-3">
@@ -799,17 +863,20 @@ export default function CarDetailsPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="Выберите банк">
                           {selectedBank && (
-                            <div className="flex items-center gap-2 w-full">
-                              {selectedBank.logo && (
-                                <Image
-                                  src={getCachedImageUrl(selectedBank.logo)}
-                                  alt={`${selectedBank.name} логотип`}
-                                  width={20}
-                                  height={20}
-                                  className="object-contain rounded"
-                                />
-                              )}
-                              <span>{selectedBank.name} - {selectedBank.rate}%</span>
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center gap-2">
+                                {selectedBank.logo && (
+                                  <Image
+                                    src={getCachedImageUrl(selectedBank.logo)}
+                                    alt={`${selectedBank.name} логотип`}
+                                    width={20}
+                                    height={20}
+                                    className="object-contain rounded"
+                                  />
+                                )}
+                                <span>{selectedBank.name}</span>
+                              </div>
+                              <span className="text-sm font-semibold text-slate-600">{selectedBank.rate}%</span>
                             </div>
                           )}
                         </SelectValue>
@@ -817,17 +884,20 @@ export default function CarDetailsPage() {
                       <SelectContent>
                         {partnerBanks.map((bank) => (
                           <SelectItem key={bank.id} value={bank.id.toString()}>
-                            <div className="flex items-center gap-2 w-full">
-                              {bank.logo && (
-                                <Image
-                                  src={getCachedImageUrl(bank.logo)}
-                                  alt={`${bank.name} логотип`}
-                                  width={20}
-                                  height={20}
-                                  className="object-contain rounded"
-                                />
-                              )}
-                              <span>{bank.name} - {bank.rate}%</span>
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center gap-2">
+                                {bank.logo && (
+                                  <Image
+                                    src={getCachedImageUrl(bank.logo)}
+                                    alt={`${bank.name} логотип`}
+                                    width={20}
+                                    height={20}
+                                    className="object-contain rounded"
+                                  />
+                                )}
+                                <span>{bank.name}</span>
+                              </div>
+                              <span className="text-sm font-semibold text-slate-600">{bank.rate}%</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -855,9 +925,12 @@ export default function CarDetailsPage() {
                     <div>
                       <div className="text-sm text-slate-500">Ежемесячный платеж</div>
                       <div className="text-3xl font-bold text-slate-900">
-                        {formatPrice(calculateMonthlyPayment())}
+                        {isBelarusianRubles
+                          ? new Intl.NumberFormat("ru-BY", { style: "currency", currency: "BYN", minimumFractionDigits: 0 }).format(calculateMonthlyPayment())
+                          : formatPrice(calculateMonthlyPayment())
+                        }
                       </div>
-                      {usdBynRate && (
+                      {!isBelarusianRubles && usdBynRate && (
                         <div className="text-xl font-semibold text-slate-700">
                           ≈ {convertUsdToByn(calculateMonthlyPayment(), usdBynRate)} BYN
                         </div>
@@ -867,13 +940,19 @@ export default function CarDetailsPage() {
                       <div>
                         <div className="text-slate-500">Переплата</div>
                         <div className="font-semibold">
-                          {formatPrice(calculateMonthlyPayment() * loanTerm[0] - creditAmount[0])}
+                          {isBelarusianRubles
+                            ? new Intl.NumberFormat("ru-BY", { style: "currency", currency: "BYN", minimumFractionDigits: 0 }).format(calculateMonthlyPayment() * loanTerm[0] - getCurrentCreditAmount())
+                            : formatPrice(calculateMonthlyPayment() * loanTerm[0] - creditAmount[0])
+                          }
                         </div>
                       </div>
                       <div>
                         <div className="text-slate-500">Общая сумма</div>
                         <div className="font-semibold">
-                          {formatPrice(calculateMonthlyPayment() * loanTerm[0] + downPayment[0])}
+                          {isBelarusianRubles
+                            ? new Intl.NumberFormat("ru-BY", { style: "currency", currency: "BYN", minimumFractionDigits: 0 }).format(calculateMonthlyPayment() * loanTerm[0] + getCurrentDownPayment())
+                            : formatPrice(calculateMonthlyPayment() * loanTerm[0] + downPayment[0])
+                          }
                         </div>
                       </div>
                     </div>
