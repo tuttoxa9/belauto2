@@ -883,22 +883,20 @@ export default function CarDetailsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {partnerBanks.map((bank) => (
-                          <SelectItem key={bank.id} value={bank.id.toString()}>
-                            <div className="flex items-center justify-between w-full">
-                              <div className="flex items-center gap-2">
-                                {bank.logo && (
-                                  <Image
-                                    src={getCachedImageUrl(bank.logo)}
-                                    alt={`${bank.name} логотип`}
-                                    width={20}
-                                    height={20}
-                                    className="object-contain rounded"
-                                  />
-                                )}
-                                <span>{bank.name}</span>
-                              </div>
-                              <span className="text-sm font-semibold text-slate-600">{bank.rate}%</span>
+                          <SelectItem key={bank.id} value={bank.id.toString()} className="relative pr-16">
+                            <div className="flex items-center gap-2 w-full">
+                              {bank.logo && (
+                                <Image
+                                  src={getCachedImageUrl(bank.logo)}
+                                  alt={`${bank.name} логотип`}
+                                  width={20}
+                                  height={20}
+                                  className="object-contain rounded flex-shrink-0"
+                                />
+                              )}
+                              <span className="truncate pr-8">{bank.name}</span>
                             </div>
+                            <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sm font-semibold text-slate-600">{bank.rate}%</span>
                           </SelectItem>
                         ))}
                       </SelectContent>
