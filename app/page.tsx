@@ -147,8 +147,12 @@ export default function HomePage() {
 
         {/* Фоновое изображение для ПК */}
         <div
-          className="absolute inset-0 bg-cover bg-center hero-bg-desktop hidden md:block"
+          className="absolute hero-bg-desktop hidden md:block"
           style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: '150px', // Заканчиваем фон ДО блока историй
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('${getCachedImageUrl('/mainTouran.PNG')}')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center 80%',

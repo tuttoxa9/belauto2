@@ -254,6 +254,7 @@
 
     .hero-bg-desktop {
       background-position: center 75% !important;
+      bottom: 140px !important;
     }
   }
 
@@ -265,6 +266,14 @@
 
     .hero-bg-desktop {
       background-position: center 80% !important;
+      bottom: 150px !important;
+    }
+  }
+
+  /* Адаптивные настройки для очень больших экранов */
+  @media (min-width: 1440px) {
+    .hero-bg-desktop {
+      bottom: 160px !important;
     }
   }
 
