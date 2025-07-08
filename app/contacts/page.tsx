@@ -318,12 +318,12 @@ export default function ContactsPage() {
                       rel="noopener noreferrer"
                       className="flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 group border border-blue-100"
                     >
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-md border-2 border-blue-100">
+                      <div className="w-16 h-12 bg-white rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-md border-2 border-blue-100">
                         <Image
                           src="/av.png"
                           alt="av.by"
-                          width={28}
-                          height={28}
+                          width={44}
+                          height={32}
                           className="object-contain"
                         />
                       </div>
