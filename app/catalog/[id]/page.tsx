@@ -122,7 +122,7 @@ export default function CarDetailsPage() {
   const [isCreditOpen, setIsCreditOpen] = useState(false)
   const [bookingForm, setBookingForm] = useState({ name: "", phone: "", message: "" })
   const [callbackForm, setCallbackForm] = useState({ name: "", phone: "" })
-  const [creditForm, setCreditForm] = useState({ name: "", phone: "", email: "", message: "" })
+  const [creditForm, setCreditForm] = useState({ name: "", phone: "", message: "" })
   const [isCreditFormOpen, setIsCreditFormOpen] = useState(false)
   const [partnerBanks, setPartnerBanks] = useState<PartnerBank[]>([])
   const [loadingBanks, setLoadingBanks] = useState(true)
@@ -146,6 +146,21 @@ export default function CarDetailsPage() {
     // Load contact data for error message
     loadContactData()
   }, [params.id])
+
+  // Сброс значений калькулятора при открытии модального окна кредита
+  useEffect(() => {
+    if (isCreditOpen && car) {
+      const price = car.price
+      if (isBelarusianRubles && usdBynRate) {
+        setCreditAmount([Math.round(price * 0.8 * usdBynRate)])
+        setDownPayment([Math.round(price * 0.2 * usdBynRate)])
+      } else {
+        setCreditAmount([price * 0.8])
+        setDownPayment([price * 0.2])
+      }
+      setLoanTerm([60])
+    }
+  }, [isCreditOpen, car, isBelarusianRubles, usdBynRate])
 
   const loadPartnerBanks = async () => {
     try {
@@ -410,7 +425,6 @@ export default function CarDetailsPage() {
           body: JSON.stringify({
             name: creditForm.name,
             phone: creditForm.phone,
-            email: creditForm.email,
             message: creditForm.message,
             carMake: car?.make,
             carModel: car?.model,
@@ -428,7 +442,7 @@ export default function CarDetailsPage() {
       }
 
       setIsCreditFormOpen(false)
-      setCreditForm({ name: "", phone: "", email: "", message: "" })
+      setCreditForm({ name: "", phone: "", message: "" })
       alert("Заявка на кредит отправлена! Мы свяжемся с вами в ближайшее время.")
     } catch (error) {
       console.error("Ошибка отправки заявки на кредит:", error)
@@ -879,30 +893,42 @@ export default function CarDetailsPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label>Сумма кредита: {formatPrice(getCurrentCreditAmount())}</Label>
-                  <Slider
-                    value={creditAmount}
-                    onValueChange={setCreditAmount}
+                  <Label>Стоимость автомобиля</Label>
+                  <Input
+                    type="number"
+                    value={isBelarusianRubles && usdBynRate ? Math.round(car.price * usdBynRate) : car.price}
+                    readOnly
+                    className="bg-slate-50"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <Label>Сумма кредита</Label>
+                  <Input
+                    type="number"
+                    value={creditAmount[0]}
+                    onChange={(e) => setCreditAmount([Number(e.target.value)])}
                     min={getCreditMinValue()}
                     max={getCreditMaxValue()}
                     step={isBelarusianRubles ? 100 : 1000}
                   />
                 </div>
                 <div className="space-y-3">
-                  <Label>Первоначальный взнос: {formatPrice(getCurrentDownPayment())}</Label>
-                  <Slider
-                    value={downPayment}
-                    onValueChange={setDownPayment}
+                  <Label>Первоначальный взнос</Label>
+                  <Input
+                    type="number"
+                    value={downPayment[0]}
+                    onChange={(e) => setDownPayment([Number(e.target.value)])}
                     min={isBelarusianRubles && usdBynRate ? car.price * 0.1 * usdBynRate : car.price * 0.1}
                     max={isBelarusianRubles && usdBynRate ? car.price * 0.5 * usdBynRate : car.price * 0.5}
                     step={isBelarusianRubles ? 100 : 1000}
                   />
                 </div>
                 <div className="space-y-3">
-                  <Label>Срок кредита: {loanTerm[0]} месяцев</Label>
-                  <Slider
-                    value={loanTerm}
-                    onValueChange={setLoanTerm}
+                  <Label>Срок кредита (месяцев)</Label>
+                  <Input
+                    type="number"
+                    value={loanTerm[0]}
+                    onChange={(e) => setLoanTerm([Number(e.target.value)])}
                     min={12}
                     max={96}
                     step={6}
@@ -1160,17 +1186,7 @@ export default function CarDetailsPage() {
                   required
                 />
               </div>
-              <div>
-                <Label htmlFor="creditEmail">Email</Label>
-                <Input
-                  id="creditEmail"
-                  type="email"
-                  value={creditForm.email}
-                  onChange={(e) => setCreditForm({ ...creditForm, email: e.target.value })}
-                  placeholder="example@mail.com"
-                  required
-                />
-              </div>
+
               <div>
                 <Label htmlFor="creditMessage">Комментарий (необязательно)</Label>
                 <Textarea
