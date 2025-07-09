@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { supabase } from "@/lib/supabase"
 import { createCacheInvalidator } from "@/lib/cache-invalidation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -52,12 +51,13 @@ export default function AdminCars() {
 
   const loadCars = async () => {
     try {
-      const snapshot = await getDocs(collection(db, "cars"))
-      const carsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
-      setCars(carsData)
+      const { data, error } = await supabase
+        .from('cars')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setCars(data || [])
     } catch (error) {
       console.error("Ошибка загрузки автомобилей:", error)
     } finally {
@@ -69,22 +69,40 @@ export default function AdminCars() {
     e.preventDefault()
     try {
       const carData = {
-        ...carForm,
-        price: Number(carForm.price),
-        mileage: Number(carForm.mileage),
-        engineVolume: parseFloat(carForm.engineVolume),
+        make: carForm.make,
+        model: carForm.model,
         year: Number(carForm.year),
-        imageUrls: carForm.imageUrls.filter((url) => url.trim() !== ""),
-        createdAt: editingCar ? editingCar.createdAt : new Date(),
-        updatedAt: new Date(),
+        price: carForm.price,
+        mileage: carForm.mileage,
+        engine_volume: carForm.engineVolume,
+        fuel_type: carForm.fuelType,
+        transmission: carForm.transmission,
+        drive_train: carForm.driveTrain,
+        body_type: carForm.bodyType,
+        color: carForm.color,
+        description: carForm.description,
+        image_urls: carForm.imageUrls.filter((url) => url.trim() !== ""),
+        is_available: carForm.isAvailable,
+        specifications: carForm.specifications,
+        features: carForm.features,
       }
 
       if (editingCar) {
-        await updateDoc(doc(db, "cars", editingCar.id), carData)
+        const { error } = await supabase
+          .from('cars')
+          .update(carData)
+          .eq('id', editingCar.id)
+
+        if (error) throw error
         await cacheInvalidator.onUpdate(editingCar.id)
       } else {
-        const docRef = await addDoc(collection(db, "cars"), carData)
-        await cacheInvalidator.onCreate(docRef.id)
+        const { data, error } = await supabase
+          .from('cars')
+          .insert([carData])
+          .select()
+
+        if (error) throw error
+        await cacheInvalidator.onCreate(data[0].id)
       }
 
       setIsDialogOpen(false)
@@ -100,12 +118,20 @@ export default function AdminCars() {
   const handleEdit = (car) => {
     setEditingCar(car)
     setCarForm({
-      ...car,
-      price: car.price.toString(),
-      mileage: car.mileage.toString(),
-      engineVolume: car.engineVolume.toString(),
-      year: car.year.toString(),
-      imageUrls: car.imageUrls.length > 0 ? car.imageUrls : [""],
+      make: car.make || "",
+      model: car.model || "",
+      year: car.year || new Date().getFullYear(),
+      price: car.price || "",
+      mileage: car.mileage || "",
+      engineVolume: car.engine_volume || "",
+      fuelType: car.fuel_type || "",
+      transmission: car.transmission || "",
+      driveTrain: car.drive_train || "",
+      bodyType: car.body_type || "",
+      color: car.color || "",
+      description: car.description || "",
+      imageUrls: car.image_urls && car.image_urls.length > 0 ? car.image_urls : [""],
+      isAvailable: car.is_available !== false,
       specifications: car.specifications || {},
       features: car.features || [],
     })
@@ -115,7 +141,12 @@ export default function AdminCars() {
   const handleDelete = async (carId) => {
     if (confirm("Удалить этот автомобиль?")) {
       try {
-        await deleteDoc(doc(db, "cars", carId))
+        const { error } = await supabase
+          .from('cars')
+          .delete()
+          .eq('id', carId)
+
+        if (error) throw error
         await cacheInvalidator.onDelete(carId)
         loadCars()
       } catch (error) {

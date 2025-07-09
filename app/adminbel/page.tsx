@@ -1,8 +1,8 @@
 "use client"
 import { useState, useEffect } from "react"
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth"
 import Image from "next/image"
-import { auth } from "@/lib/firebase"
+import { supabase } from "@/lib/supabase"
+import type { User } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,25 +26,45 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState("")
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user)
-    })
-    return () => unsubscribe()
+    // Check current session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setUser(session?.user ?? null)
+    }
+
+    checkSession()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null)
+      }
+    )
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoginError("")
     try {
-      await signInWithEmailAndPassword(auth, loginForm.email, loginForm.password)
-    } catch {
-      setLoginError("Неверный email или пароль")
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginForm.email,
+        password: loginForm.password,
+      })
+
+      if (error) {
+        setLoginError("Неверный email или пароль")
+      }
+    } catch (error) {
+      console.error("Ошибка входа:", error)
+      setLoginError("Произошла ошибка при входе")
     }
   }
 
   const handleLogout = async () => {
     try {
-      await signOut(auth)
+      await supabase.auth.signOut()
     } catch (error) {
       console.error("Ошибка выхода:", error)
     }

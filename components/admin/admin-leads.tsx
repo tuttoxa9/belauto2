@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { collection, getDocs, updateDoc, deleteDoc, doc, orderBy, query } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { supabase } from "@/lib/supabase"
 import { createCacheInvalidator } from "@/lib/cache-invalidation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,14 +21,13 @@ export default function AdminLeads() {
 
   const loadLeads = async () => {
     try {
-      const leadsQuery = query(collection(db, "leads"), orderBy("createdAt", "desc"))
-      const snapshot = await getDocs(leadsQuery)
-      const leadsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-      }))
-      setLeads(leadsData)
+      const { data, error } = await supabase
+        .from('leads')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setLeads(data || [])
     } catch (error) {
       console.error("Ошибка загрузки заявок:", error)
     } finally {
@@ -39,7 +37,12 @@ export default function AdminLeads() {
 
   const updateLeadStatus = async (leadId, status) => {
     try {
-      await updateDoc(doc(db, "leads", leadId), { status })
+      const { error } = await supabase
+        .from('leads')
+        .update({ status })
+        .eq('id', leadId)
+
+      if (error) throw error
       await cacheInvalidator.onUpdate(leadId)
       loadLeads()
     } catch (error) {
@@ -50,7 +53,12 @@ export default function AdminLeads() {
   const deleteLead = async (leadId) => {
     if (confirm("Удалить эту заявку?")) {
       try {
-        await deleteDoc(doc(db, "leads", leadId))
+        const { error } = await supabase
+          .from('leads')
+          .delete()
+          .eq('id', leadId)
+
+        if (error) throw error
         await cacheInvalidator.onDelete(leadId)
         loadLeads()
       } catch (error) {

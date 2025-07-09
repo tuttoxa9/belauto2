@@ -2,58 +2,59 @@
 const WORKER_URL = process.env.NEXT_PUBLIC_IMAGE_CACHE_WORKER_URL || 'https://images.belautocenter.by';
 
 /**
- * Converts Firebase Storage URL to cached URL via Cloudflare Worker
- * @param firebaseUrl - Original Firebase Storage URL
+ * Converts Supabase Storage URL to cached URL via Cloudflare Worker
+ * @param supabaseUrl - Original Supabase Storage URL
  * @returns Cached URL via Cloudflare Worker
  */
-export function getCachedImageUrl(firebaseUrl: string): string {
-  // If no Firebase URL provided, return empty string
-  if (!firebaseUrl) {
+export function getCachedImageUrl(supabaseUrl: string): string {
+  // If no Supabase URL provided, return empty string
+  if (!supabaseUrl) {
     return '';
   }
 
   // If it's already a cached URL, return as is
-  if (firebaseUrl.includes(WORKER_URL)) {
-    return firebaseUrl;
+  if (supabaseUrl.includes(WORKER_URL)) {
+    return supabaseUrl;
   }
 
-  // If it's not a Firebase Storage URL, return as is
-  if (!firebaseUrl.includes('firebasestorage.googleapis.com') &&
-      !firebaseUrl.includes('firebasestorage.app')) {
-    return firebaseUrl;
-  }
-
-  try {
-    // Parse Firebase Storage URL and extract the path
-    const url = new URL(firebaseUrl);
-
-    // Extract path from Firebase Storage URL
-    // Example: /v0/b/autobel-a6390.appspot.com/o/путь%2Fк%2Fкартинке.jpg
-    const pathMatch = url.pathname.match(/\/v0\/b\/[^\/]+\/o\/(.+)/);
-
-    if (pathMatch && pathMatch[1]) {
-      // Decode the path and convert %2F back to /
-      const decodedPath = decodeURIComponent(pathMatch[1]);
-
-      // Remove any query parameters like ?alt=media
-      const cleanPath = decodedPath.split('?')[0];
-
-      // Construct new URL: https://images.belautocenter.by/images/cars/картинка.jpg
-      return `${WORKER_URL}/${cleanPath}`;
+  // Handle both Supabase URLs and legacy Firebase URLs during migration
+  if (supabaseUrl.includes('supabase.co/storage/v1/object/public/')) {
+    // Supabase URL format: https://project.supabase.co/storage/v1/object/public/images/path/to/file.jpg
+    try {
+      const url = new URL(supabaseUrl);
+      const pathMatch = url.pathname.match(/\/storage\/v1\/object\/public\/images\/(.+)$/);
+      if (pathMatch) {
+        const imagePath = pathMatch[1];
+        return `${WORKER_URL}/${imagePath}`;
+      }
+    } catch (error) {
+      console.warn('Failed to parse Supabase URL:', supabaseUrl, error);
     }
-  } catch (error) {
-    console.warn('Failed to parse Firebase URL:', firebaseUrl, error);
+  } else if (supabaseUrl.includes('firebasestorage.googleapis.com') ||
+             supabaseUrl.includes('firebasestorage.app')) {
+    // Legacy Firebase URL support during migration
+    try {
+      const url = new URL(supabaseUrl);
+      const pathMatch = url.pathname.match(/\/v0\/b\/[^\/]+\/o\/(.+)/);
+      if (pathMatch && pathMatch[1]) {
+        const decodedPath = decodeURIComponent(pathMatch[1]);
+        const cleanPath = decodedPath.split('?')[0];
+        return `${WORKER_URL}/${cleanPath}`;
+      }
+    } catch (error) {
+      console.warn('Failed to parse Firebase URL:', supabaseUrl, error);
+    }
   }
 
   // Fallback to original URL if parsing fails
-  return firebaseUrl;
+  return supabaseUrl;
 }
 
 /**
- * Converts array of Firebase Storage URLs to cached URLs
- * @param firebaseUrls - Array of Firebase Storage URLs
+ * Converts array of Supabase Storage URLs to cached URLs
+ * @param supabaseUrls - Array of Supabase Storage URLs
  * @returns Array of cached URLs
  */
-export function getCachedImageUrls(firebaseUrls: string[]): string[] {
-  return firebaseUrls.map(url => getCachedImageUrl(url));
+export function getCachedImageUrls(supabaseUrls: string[]): string[] {
+  return supabaseUrls.map(url => getCachedImageUrl(url));
 }

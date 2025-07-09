@@ -12,8 +12,7 @@ import CarCard from "@/components/car-card"
 import { Filter, SlidersHorizontal } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import CarCardSkeleton from "@/components/car-card-skeleton"
-import { collection, getDocs } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { supabase } from "@/lib/supabase"
 
 interface Car {
   id: string;
@@ -96,11 +95,35 @@ export default function CatalogPage() {
   const loadCars = async () => {
     try {
       setLoading(true)
-      const snapshot = await getDocs(collection(db, "cars"))
-      const carsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
+      const { data, error } = await supabase
+        .from('cars')
+        .select('*')
+        .eq('is_available', true)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      // Convert Supabase format to component format
+      const carsData = data?.map((car) => ({
+        id: car.id,
+        make: car.make,
+        model: car.model,
+        year: car.year,
+        price: Number(car.price) || 0,
+        mileage: Number(car.mileage) || 0,
+        transmission: car.transmission,
+        fuelType: car.fuel_type,
+        bodyType: car.body_type,
+        color: car.color,
+        imageUrls: car.image_urls || [],
+        isAvailable: car.is_available,
+        engineVolume: car.engine_volume,
+        driveTrain: car.drive_train,
+        description: car.description,
+        specifications: car.specifications,
+        features: car.features,
+      })) || []
+
       setCars(carsData as Car[])
     } catch (error) {
       console.error("Ошибка загрузки автомобилей:", error)
