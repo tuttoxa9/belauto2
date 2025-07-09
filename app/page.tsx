@@ -12,8 +12,7 @@ import CarCard from "@/components/car-card"
 import CarCardSkeleton from "@/components/car-card-skeleton"
 import FadeInImage from "@/components/fade-in-image"
 import { CheckCircle, Check } from "lucide-react"
-import { collection, query, orderBy, limit, getDocs, doc, getDoc, addDoc } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { supabase } from "@/lib/supabase"
 import { getCachedImageUrl } from "@/lib/image-cache"
 
 interface HomepageSettings {
@@ -23,8 +22,6 @@ interface HomepageSettings {
   ctaTitle: string
   ctaSubtitle: string
 }
-
-// Моковые данные удалены
 
 export default function HomePage() {
   const [searchForm, setSearchForm] = useState({
@@ -56,12 +53,21 @@ export default function HomePage() {
 
   const loadHomepageSettings = async () => {
     try {
-      const settingsDoc = await getDoc(doc(db, "settings", "homepage"))
-      if (settingsDoc.exists()) {
-        const data = settingsDoc.data() as Partial<HomepageSettings>
+      const { data, error } = await supabase
+        .from('content_pages')
+        .select('content')
+        .eq('page', 'homepage')
+        .single()
+
+      if (error) {
+        console.error("Ошибка загрузки настроек главной страницы:", error)
+        return
+      }
+
+      if (data && data.content) {
         setSettings((prev) => ({
           ...prev,
-          ...data,
+          ...data.content,
         }))
       }
     } catch (error) {
@@ -72,14 +78,19 @@ export default function HomePage() {
   const loadFeaturedCars = async () => {
     try {
       setLoadingCars(true)
-      const carsQuery = query(collection(db, "cars"), orderBy("createdAt", "desc"), limit(4))
-      const snapshot = await getDocs(carsQuery)
-      const carsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
+      const { data: carsData, error } = await supabase
+        .from('cars')
+        .select('*')
+        .eq('is_available', true)
+        .order('created_at', { ascending: false })
+        .limit(4)
 
-      if (carsData.length > 0) {
+      if (error) {
+        console.error("Ошибка загрузки автомобилей:", error)
+        return
+      }
+
+      if (carsData && carsData.length > 0) {
         setCars(carsData as any)
       }
     } catch (error) {
@@ -103,13 +114,21 @@ export default function HomePage() {
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      // Сохраняем в Firebase
-      await addDoc(collection(db, "leads"), {
-        ...contactForm,
-        type: "car_selection",
-        status: "new",
-        createdAt: new Date(),
-      })
+      // Сохраняем в Supabase
+      const { error } = await supabase
+        .from('leads')
+        .insert([{
+          name: contactForm.name,
+          phone: contactForm.phone,
+          type: 'contact',
+          status: 'new'
+        }])
+
+      if (error) {
+        console.error("Ошибка сохранения заявки:", error)
+        alert("Произошла ошибка. Попробуйте еще раз.")
+        return
+      }
 
       // Отправляем уведомление в Telegram
       await fetch('/api/send-telegram', {

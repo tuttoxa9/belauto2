@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, orderBy, query } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { supabase } from "@/lib/supabase"
 import { createCacheInvalidator } from "@/lib/cache-invalidation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,9 +22,8 @@ export default function AdminReviews() {
   const [reviewForm, setReviewForm] = useState({
     name: "",
     rating: 5,
-    text: "",
-    carModel: "",
-    status: "published",
+    comment: "",
+    is_approved: true,
   })
 
   useEffect(() => {
@@ -34,14 +32,14 @@ export default function AdminReviews() {
 
   const loadReviews = async () => {
     try {
-      const reviewsQuery = query(collection(db, "reviews"), orderBy("createdAt", "desc"))
-      const snapshot = await getDocs(reviewsQuery)
-      const reviewsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-      }))
-      setReviews(reviewsData)
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      setReviews(data || [])
     } catch (error) {
       console.error("Ошибка загрузки отзывов:", error)
     } finally {
@@ -52,27 +50,40 @@ export default function AdminReviews() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const reviewData = {
-        ...reviewForm,
-        rating: Number(reviewForm.rating),
-        createdAt: editingReview ? editingReview.createdAt : new Date(),
-        updatedAt: new Date(),
-      }
-
       if (editingReview) {
-        await updateDoc(doc(db, "reviews", editingReview.id), reviewData)
-        await cacheInvalidator.onUpdate(editingReview.id)
+        // Обновление существующего отзыва
+        const { error } = await supabase
+          .from('reviews')
+          .update({
+            name: reviewForm.name,
+            rating: reviewForm.rating,
+            comment: reviewForm.comment,
+            is_approved: reviewForm.is_approved,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', editingReview.id)
+
+        if (error) throw error
       } else {
-        const docRef = await addDoc(collection(db, "reviews"), reviewData)
-        await cacheInvalidator.onCreate(docRef.id)
+        // Создание нового отзыва
+        const { error } = await supabase
+          .from('reviews')
+          .insert([{
+            name: reviewForm.name,
+            rating: reviewForm.rating,
+            comment: reviewForm.comment,
+            is_approved: reviewForm.is_approved
+          }])
+
+        if (error) throw error
       }
 
-      setIsDialogOpen(false)
-      setEditingReview(null)
+      await cacheInvalidator.invalidateCache()
+      await loadReviews()
       resetForm()
-      loadReviews()
+      setIsDialogOpen(false)
     } catch (error) {
-      console.error("Ошибка сохранения:", error)
+      console.error("Ошибка сохранения отзыва:", error)
       alert("Ошибка сохранения отзыва")
     }
   }
@@ -82,172 +93,171 @@ export default function AdminReviews() {
     setReviewForm({
       name: review.name,
       rating: review.rating,
-      text: review.text,
-      carModel: review.carModel || "",
-      status: review.status,
+      comment: review.comment,
+      is_approved: review.is_approved,
     })
     setIsDialogOpen(true)
   }
 
   const handleDelete = async (reviewId) => {
-    if (confirm("Удалить этот отзыв?")) {
-      try {
-        await deleteDoc(doc(db, "reviews", reviewId))
-        await cacheInvalidator.onDelete(reviewId)
-        loadReviews()
-      } catch (error) {
-        console.error("Ошибка удаления:", error)
-        alert("Ошибка удаления отзыва")
-      }
+    if (!confirm("Вы уверены, что хотите удалить этот отзыв?")) return
+
+    try {
+      const { error } = await supabase
+        .from('reviews')
+        .delete()
+        .eq('id', reviewId)
+
+      if (error) throw error
+
+      await cacheInvalidator.invalidateCache()
+      await loadReviews()
+    } catch (error) {
+      console.error("Ошибка удаления отзыва:", error)
+      alert("Ошибка удаления отзыва")
+    }
+  }
+
+  const toggleApproval = async (review) => {
+    try {
+      const { error } = await supabase
+        .from('reviews')
+        .update({
+          is_approved: !review.is_approved,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', review.id)
+
+      if (error) throw error
+
+      await cacheInvalidator.invalidateCache()
+      await loadReviews()
+    } catch (error) {
+      console.error("Ошибка изменения статуса отзыва:", error)
+      alert("Ошибка изменения статуса отзыва")
     }
   }
 
   const resetForm = () => {
+    setEditingReview(null)
     setReviewForm({
       name: "",
       rating: 5,
-      text: "",
-      carModel: "",
-      status: "published",
+      comment: "",
+      is_approved: true,
     })
-  }
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "published":
-        return "bg-green-100 text-green-800"
-      case "pending":
-        return "bg-yellow-100 text-yellow-800"
-      case "rejected":
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case "published":
-        return "Опубликован"
-      case "pending":
-        return "На модерации"
-      case "rejected":
-        return "Отклонен"
-      default:
-        return status
-    }
   }
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => (
-      <Star key={i} className={`h-4 w-4 ${i < rating ? "text-yellow-400 fill-current" : "text-gray-300"}`} />
+      <Star
+        key={i}
+        className={`h-4 w-4 ${i < rating ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+      />
     ))
   }
 
   if (loading) {
-    return <div className="text-center py-8 text-white">Загрузка...</div>
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-3xl font-bold">Отзывы</h2>
+        </div>
+        <div className="grid gap-4">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="bg-white p-6 rounded-lg shadow animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Управление отзывами</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold">Отзывы</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                resetForm()
-                setEditingReview(null)
-              }}
-              className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
-            >
+            <Button onClick={resetForm}>
               <Plus className="h-4 w-4 mr-2" />
               Добавить отзыв
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-slate-800 border-slate-700 text-white">
+          <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-white">{editingReview ? "Редактировать" : "Добавить"} отзыв</DialogTitle>
+              <DialogTitle>
+                {editingReview ? "Редактировать отзыв" : "Добавить отзыв"}
+              </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label className="text-white">Имя клиента</Label>
+                <Label>Имя</Label>
                 <Input
                   value={reviewForm.name}
                   onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
-                  className="bg-slate-700 border-slate-600 text-white"
                   required
                 />
               </div>
-
               <div>
-                <Label className="text-white">Рейтинг</Label>
+                <Label>Рейтинг</Label>
                 <Select
                   value={reviewForm.rating.toString()}
-                  onValueChange={(value) => setReviewForm({ ...reviewForm, rating: Number(value) })}
+                  onValueChange={(value) => setReviewForm({ ...reviewForm, rating: parseInt(value) })}
                 >
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-700 border-slate-600">
+                  <SelectContent>
                     {[1, 2, 3, 4, 5].map((rating) => (
                       <SelectItem key={rating} value={rating.toString()}>
                         <div className="flex items-center space-x-2">
                           <span>{rating}</span>
-                          <div className="flex">{renderStars(rating)}</div>
+                          <div className="flex">
+                            {renderStars(rating)}
+                          </div>
                         </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-
               <div>
-                <Label className="text-white">Модель автомобиля (опционально)</Label>
-                <Input
-                  value={reviewForm.carModel}
-                  onChange={(e) => setReviewForm({ ...reviewForm, carModel: e.target.value })}
-                  className="bg-slate-700 border-slate-600 text-white"
-                />
-              </div>
-
-              <div>
-                <Label className="text-white">Текст отзыва</Label>
+                <Label>Отзыв</Label>
                 <Textarea
-                  value={reviewForm.text}
-                  onChange={(e) => setReviewForm({ ...reviewForm, text: e.target.value })}
-                  className="bg-slate-700 border-slate-600 text-white"
-                  rows={4}
+                  value={reviewForm.comment}
+                  onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
                   required
+                  rows={4}
                 />
               </div>
-
               <div>
-                <Label className="text-white">Статус</Label>
+                <Label>Статус</Label>
                 <Select
-                  value={reviewForm.status}
-                  onValueChange={(value) => setReviewForm({ ...reviewForm, status: value })}
+                  value={reviewForm.is_approved ? "approved" : "pending"}
+                  onValueChange={(value) => setReviewForm({ ...reviewForm, is_approved: value === "approved" })}
                 >
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-700 border-slate-600">
-                    <SelectItem value="published">Опубликован</SelectItem>
+                  <SelectContent>
+                    <SelectItem value="approved">Одобрен</SelectItem>
                     <SelectItem value="pending">На модерации</SelectItem>
-                    <SelectItem value="rejected">Отклонен</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="flex space-x-2">
-                <Button type="submit" className="flex-1 bg-gradient-to-r from-purple-500 to-blue-500">
+                <Button type="submit" className="flex-1">
                   {editingReview ? "Сохранить" : "Добавить"}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
-                  className="border-slate-600 text-white hover:bg-slate-700"
+                  className="flex-1"
                 >
                   Отмена
                 </Button>
@@ -257,35 +267,48 @@ export default function AdminReviews() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        {reviews && reviews.map((review) => (
-          <Card key={review.id} className="bg-slate-800/50 backdrop-blur-lg border-slate-700">
+      <div className="grid gap-4">
+        {reviews.map((review) => (
+          <Card key={review.id}>
             <CardContent className="p-6">
-              <div className="flex items-start justify-between">
+              <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="font-semibold text-white">{review.name}</h3>
-                    <div className="flex">{renderStars(review.rating)}</div>
-                    <Badge className={getStatusColor(review.status)}>{getStatusText(review.status)}</Badge>
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4 text-gray-500" />
+                      <span className="font-semibold">{review.name}</span>
+                    </div>
+                    <div className="flex space-x-1">
+                      {renderStars(review.rating)}
+                    </div>
+                    <Badge variant={review.is_approved ? "default" : "secondary"}>
+                      {review.is_approved ? "Одобрен" : "На модерации"}
+                    </Badge>
                   </div>
-                  {review.carModel && <p className="text-sm text-slate-400 mb-2">Автомобиль: {review.carModel}</p>}
-                  <p className="text-slate-300 mb-3">{review.text}</p>
-                  <p className="text-xs text-slate-500">{review.createdAt.toLocaleDateString("ru-RU")}</p>
+                  <p className="text-gray-700 mb-2">{review.comment}</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(review.created_at).toLocaleDateString("ru-RU")}
+                  </p>
                 </div>
                 <div className="flex space-x-2 ml-4">
                   <Button
-                    size="sm"
                     variant="outline"
+                    size="sm"
+                    onClick={() => toggleApproval(review)}
+                  >
+                    {review.is_approved ? "Скрыть" : "Одобрить"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => handleEdit(review)}
-                    className="border-slate-600 text-white hover:bg-slate-700"
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
-                    size="sm"
                     variant="outline"
+                    size="sm"
                     onClick={() => handleDelete(review.id)}
-                    className="border-slate-600 text-white hover:bg-slate-700"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -298,8 +321,9 @@ export default function AdminReviews() {
 
       {reviews.length === 0 && (
         <div className="text-center py-12">
-          <User className="h-12 w-12 mx-auto text-slate-400 mb-4" />
-          <p className="text-slate-400">Отзывы не добавлены</p>
+          <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Нет отзывов</h3>
+          <p className="text-gray-500">Добавьте первый отзыв для отображения</p>
         </div>
       )}
     </div>

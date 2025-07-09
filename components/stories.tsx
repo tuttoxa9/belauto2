@@ -4,18 +4,16 @@ import { useState, useEffect } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { ChevronLeft, ChevronRight, Play } from "lucide-react"
 import FadeInImage from "@/components/fade-in-image"
-import { collection, query, orderBy, getDocs, doc, getDoc } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { supabase } from "@/lib/supabase"
 
 interface Story {
   id: string
-  mediaUrl: string
-  mediaType: "image" | "video"
-  caption: string
-  subtitle?: string
-  linkUrl?: string
+  title: string
+  image_url: string
+  link?: string
   order: number
-  createdAt: Date
+  is_active: boolean
+  created_at: string
 }
 
 interface StoriesSettings {
@@ -43,9 +41,22 @@ export default function Stories() {
 
   const loadSettings = async () => {
     try {
-      const settingsDoc = await getDoc(doc(db, "settings", "stories"))
-      if (settingsDoc.exists()) {
-        setSettings(settingsDoc.data() as StoriesSettings)
+      const { data, error } = await supabase
+        .from('content_pages')
+        .select('content')
+        .eq('page', 'stories')
+        .single()
+
+      if (error) {
+        console.error("Ошибка загрузки настроек историй:", error)
+        return
+      }
+
+      if (data && data.content) {
+        setSettings({
+          title: data.content.title || "Свежие поступления и новости",
+          subtitle: data.content.subtitle || "Следите за нашими обновлениями"
+        })
       }
     } catch (error) {
       console.error("Ошибка загрузки настроек историй:", error)
@@ -54,44 +65,17 @@ export default function Stories() {
 
   const loadStories = async () => {
     try {
-      const storiesQuery = query(collection(db, "stories"), orderBy("order", "asc"))
-      const snapshot = await getDocs(storiesQuery)
-      const storiesData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-      })) as Story[]
+      const { data, error } = await supabase
+        .from('stories')
+        .select('*')
+        .eq('is_active', true)
+        .order('order', { ascending: true })
 
-      setStories(storiesData)
+      if (error) throw error
+
+      setStories(data || [])
     } catch (error) {
       console.error("Ошибка загрузки историй:", error)
-      // Используем моковые данные в случае ошибки
-      setStories([
-        {
-          id: "1",
-          mediaUrl: "/placeholder.svg?height=600&width=400",
-          mediaType: "image",
-          caption: "Новое поступление BMW X5 2020",
-          order: 1,
-          createdAt: new Date(),
-        },
-        {
-          id: "2",
-          mediaUrl: "/placeholder.svg?height=600&width=400",
-          mediaType: "image",
-          caption: "Audi A6 в отличном состоянии",
-          order: 2,
-          createdAt: new Date(),
-        },
-        {
-          id: "3",
-          mediaUrl: "/placeholder.svg?height=600&width=400",
-          mediaType: "image",
-          caption: "Mercedes-Benz C-Class готов к продаже",
-          order: 3,
-          createdAt: new Date(),
-        },
-      ])
     } finally {
       setLoading(false)
     }
@@ -126,11 +110,11 @@ export default function Stories() {
     const story = stories[currentIndex]
 
     // Если у истории есть ссылка, переходим по ней
-    if (story.linkUrl) {
-      if (story.linkUrl.startsWith('http')) {
-        window.open(story.linkUrl, '_blank')
+    if (story.link) {
+      if (story.link.startsWith('http')) {
+        window.open(story.link, '_blank')
       } else {
-        window.location.href = story.linkUrl
+        window.location.href = story.link
       }
     }
   }
@@ -204,24 +188,14 @@ export default function Stories() {
               >
                 <div className="w-full h-full rounded-full overflow-hidden bg-white">
                   <FadeInImage
-                    src={story.mediaUrl || "/placeholder.svg"}
-                    alt={story.caption}
+                    src={story.image_url || "/placeholder.svg"}
+                    alt={story.title}
                     className="w-full h-full object-cover"
                   />
                 </div>
               </div>
-              {story.mediaType === "video" && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-5 h-5 bg-white bg-opacity-90 rounded-full flex items-center justify-center">
-                    <Play className="h-2.5 w-2.5 text-gray-800 ml-0.5" />
-                  </div>
-                </div>
-              )}
               <div className="text-center mt-2 max-w-16">
-                <p className="text-xs text-gray-600 truncate font-medium">{story.caption}</p>
-                {story.subtitle && (
-                  <p className="text-xs text-gray-500 truncate mt-1">{story.subtitle}</p>
-                )}
+                <p className="text-xs text-gray-600 truncate font-medium">{story.title}</p>
               </div>
             </button>
           ))}
@@ -252,26 +226,16 @@ export default function Stories() {
                 className="relative h-full cursor-pointer"
                 onClick={handleFullscreenClick}
               >
-                {stories[currentIndex].mediaType === "image" ? (
-                  <FadeInImage
-                    src={stories[currentIndex].mediaUrl || "/placeholder.svg"}
-                    alt={stories[currentIndex].caption}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <video
-                    src={stories[currentIndex].mediaUrl}
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    muted
-                    loop
-                  />
-                )}
+                <FadeInImage
+                  src={stories[currentIndex].image_url || "/placeholder.svg"}
+                  alt={stories[currentIndex].title}
+                  className="w-full h-full object-cover"
+                />
 
                 {/* Подпись с затемнением */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                  <p className="text-white text-sm font-medium">{stories[currentIndex].caption}</p>
-                  {stories[currentIndex].linkUrl && (
+                  <p className="text-white text-sm font-medium">{stories[currentIndex].title}</p>
+                  {stories[currentIndex].link && (
                     <p className="text-blue-300 text-xs mt-1 flex items-center">
                       <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -294,8 +258,6 @@ export default function Stories() {
                 >
                   {currentIndex > 0 && <ChevronLeft className="h-8 w-8 text-white/70 hover:text-white" />}
                 </button>
-
-
 
                 <button
                   onClick={(e) => {
